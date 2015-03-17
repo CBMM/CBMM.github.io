@@ -1,0 +1,16 @@
+[
+  {
+  "name":"test",
+  "imports":[
+   "framework",
+   "quickcheck"]
+  },
+  {
+  "name":"framework",
+  "imports":[]
+  },
+  {
+  "name":"quickcheck",
+  "imports":[]
+  }
+]

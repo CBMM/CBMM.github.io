@@ -1,0 +1,17 @@
+* Test project A
+** Sketch
+   DEADLINE: <2015-04-08 Wed>
+** MVP
+   DEADLINE: <2015-04-12 Sun>
+
+** Testsuite
+   DEADLINE: <2015-03-28 Sat>
+** Release
+   DEADLINE: <2015-04-28 Tue>
+* Test project A
+  DEADLINE: <2015-05-14 Thu>
+** Sketch
+** MVP
+** Testsuite
+   DEADLINE: <2015-05-02 Sat>
+** Release

@@ -1,0 +1,11 @@
+*~
+.cabal-sandbox
+site/.cabal-sandbox
+site/cabal.sandbox.config
+bower_components
+site/site
+site/_cache
+site/_site
+site/site.cabal.cabal
+*.hi
+*.o
