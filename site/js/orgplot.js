@@ -1,4 +1,4 @@
-p = d3.select(".my_div").selectAll("p")
+p = d3.select(".projectsDiv").selectAll("p")
     .data([4,8,15,23,42])
     .style("color", function(d,i){
         return "hsl(" + Math.random() * 360 + ",50%,50%)"})
@@ -32,7 +32,15 @@ function allTags(d){
 
 var Config = function() {
     // The start time from POV of the org chart
-    this.bang   = new Date('2014-01-01');
+    this.bigbang   = new Date('2014-01-01');
     // The end time from the POV of the org chart
-    this.crunch = new Date('2016-01-01');
+    this.bigcrunch = new Date('2016-01-01');
 };
+
+t = d3.seelct(".tagsDiv").selectAll("div")
+    .data( allTags(d) )
+
+t.enter().append("div")
+    .text( function(d) {return d} )
+    .style("background-color","blue")
+
