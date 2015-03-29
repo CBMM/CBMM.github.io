@@ -1,4 +1,4 @@
-* Test project A
+* Test project A                                               :Test:Project:
 ** Sketch
    DEADLINE: <2015-04-08 Wed>
 ** MVP
@@ -7,8 +7,10 @@
 ** Testsuite
    DEADLINE: <2015-03-28 Sat>
 ** Release
-   DEADLINE: <2015-04-28 Tue>
-* Test project A
+DEADLINE: <2015-04-28 Tue>
+*                                    [#B] My title [0/1]              :Empty:
+** TODO Test
+* Test project A                                        :More tests:Homework:
   DEADLINE: <2015-05-14 Thu>
 ** Sketch
 ** MVP
