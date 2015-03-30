@@ -1,0 +1,24 @@
+.tagsDiv div{
+    border:           1px solid hsl(120,50%,50%);
+    border-radius:    4px;
+    background-color: rgba(0,0,0,0);
+    margin:           10px;
+    text-align:       center;
+    padding:          3px;
+    font-family:      'Source Sans Pro', sans-serif;
+    width:            100px;
+    color:            hsl(120,50%,50%);
+}
+
+.tagsDiv div:hover{
+    background-color: hsla(120,50%,50%,0.1);
+}
+
+.headlinesDiv div{
+    background-color: rgba(200,0,200,0.4);
+    margin:           10px;
+}
+
+g {
+    background-color: rgba(0,255,0,0.4);
+}
