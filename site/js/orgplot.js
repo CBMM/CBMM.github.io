@@ -46,25 +46,32 @@ function allTags(d){
 }
 
 
-// Setup tag buttons
-t = d3.select(".tagsDiv").selectAll("div")
-    .data( setToArray(allTags(d)) )
-    .text( function(d) {return d});
-
-t.enter().append("div")
-    .text( function(d) {return d} )
-
 // Setup headlines
 h = d3.select(".headlinesDiv")
        .attr("width", width + margin.left + margin.right)
       .append("g")
        .attr("transform","translate(" + margin.left + "," + margin.top + ")");
 
-hs = d3.select(".headlinesDiv").selectAll("div")
-     .data(d.documentHeadings);
+d3.json("todo.json", function(error,data){
 
-hs.enter().append("div")
-     .text( function(dh) {return dh.title} )
-     .append("div")
-     .text( function(dh) {return "appended"});
+    // Setup tag buttons
+    t = d3.select(".tagsDiv").selectAll("div")
+        .data( setToArray(allTags(data)) )
+        .text( function(d) {return d});
 
+    t.enter().append("div")
+        .text( function(d) {return d} )
+
+    chart.append("g")
+        .attr("class","x axis")
+        .attr("transform","translate(0," + height + ")")
+        .
+    hs = d3.select(".headlinesDiv").selectAll("div")
+         .data(data.documentHeadings);
+
+    hs.enter().append("div")
+         .text( function(dh) {return dh.title} )
+         .append("div")
+         .text( function(dh) {return "appended"});
+
+});
