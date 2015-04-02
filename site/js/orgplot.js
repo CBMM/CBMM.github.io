@@ -18,15 +18,16 @@ cfg.now = Date.now();
 
 var margin = {top: 10, bottom: 50, left: 50, right: 50},
     width  = 500 - margin.left - margin.right,
-    height = 600 - margin.top  - margin.bottom;
+    height = 300 - margin.top  - margin.bottom;
 
 var x = d3.scale.linear()
          .domain([cfg.bigbang, cfg.bigcrunch])
          .range([0, 300]);
 
 var xAxis = d3.svg.axis()
-             .scale(x)
-             .orient("top");
+    .scale(x)
+    .ticks(1000000)
+    .orient("top");
 
 // Utility function
 function headingTags(h,s){
@@ -47,10 +48,11 @@ function allTags(d){
 
 
 // Setup headlines
-h = d3.select(".headlinesDiv")
-       .attr("width", width + margin.left + margin.right)
-      .append("g")
-       .attr("transform","translate(" + margin.left + "," + margin.top + ")");
+var chart = d3.select(".headlinesChart")
+    .attr("width", width + margin.left + margin.right)
+    .attr("height", height + margin.top + margin.bottom)
+  .append("g")
+    .attr("transform","translate(" + margin.left + "," + margin.top + ")");
 
 d3.json("todo.json", function(error,data){
 
@@ -65,13 +67,21 @@ d3.json("todo.json", function(error,data){
     chart.append("g")
         .attr("class","x axis")
         .attr("transform","translate(0," + height + ")")
-        .
-    hs = d3.select(".headlinesDiv").selectAll("div")
-         .data(data.documentHeadings);
+        .call(xAxis);
+    //hs = d3.select(".headlinesDiv").selectAll("div")
+    //     .data(data.documentHeadings);
 
-    hs.enter().append("div")
-         .text( function(dh) {return dh.title} )
-         .append("div")
-         .text( function(dh) {return "appended"});
+    chart.selectAll(".bar")
+        .data(data.documentHeadings)
+      .enter().append("div")
+        .attr("class","headingDiv")
+        .text( function(dh) {return dh.title} )
+        .attr("x", 100)
+        .attr("y", 100)
+        .attr("fill","rgba(0,0,0,0)")
+        .attr("stroke","rgba(0,0,0,1)")
+        .attr("height",20)
+        .attr("width", 100);
+
 
 });
