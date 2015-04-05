@@ -1,6 +1,7 @@
-* Test project A                                               :Test:Project:
-** Sketch
-   DEADLINE: <2015-04-08 Wed>
+* DONE Test project A                                          :Test:Project:
+CLOSED: [2015-04-03 Fri 22:57]
+** DONE Sketch
+CLOSED: [2015-04-03 Fri 22:58] DEADLINE: <2015-04-08 Wed>
 ** MVP
    DEADLINE: <2015-04-12 Sun>
 

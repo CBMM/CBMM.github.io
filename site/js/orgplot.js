@@ -1,6 +1,6 @@
 function setToArray(s){
     var a = [];
-    s.forEach(function(x) {a.push(x)});
+    s.forEach(function(x) {a.push(x);});
     return a;
 }
 
@@ -25,13 +25,14 @@ var x = d3.scale.linear()
          .range([0, 300]);
 
 var xAxis = d3.svg.axis()
-    .scale(x)
-    .ticks(1000000)
-    .orient("top");
+        .scale(x)
+        .ticks(2)
+        .orient("top");
+
 
 // Utility function
 function headingTags(h,s){
-    h.tags.forEach(function(t) {s.add(t)});
+    h.tags.forEach(function(t) {s.add(t);});
     h.subHeadings.forEach(function(sh){
         headingTags(sh,s);
     });
@@ -59,10 +60,10 @@ d3.json("todo.json", function(error,data){
     // Setup tag buttons
     t = d3.select(".tagsDiv").selectAll("div")
         .data( setToArray(allTags(data)) )
-        .text( function(d) {return d});
+        .text( function(d) {return d;});
 
     t.enter().append("div")
-        .text( function(d) {return d} )
+        .text( function(d) {return d;});
 
     chart.append("g")
         .attr("class","x axis")
@@ -71,17 +72,48 @@ d3.json("todo.json", function(error,data){
     //hs = d3.select(".headlinesDiv").selectAll("div")
     //     .data(data.documentHeadings);
 
-    chart.selectAll(".bar")
+    var y = d3.scale.ordinal()
+            .rangeRoundBands([0,height], 0.1);
+
+    y.domain(data.documentHeadings.map(function(h){return (h.title);}));
+
+    chart.selectAll(".headlinesChart")
         .data(data.documentHeadings)
       .enter().append("div")
-        .attr("class","headingDiv")
-        .text( function(dh) {return dh.title} )
-        .attr("x", 100)
-        .attr("y", 100)
+        .attr("class","headingDiv2")
+        .text( function(dh) {return dh.title;} )
         .attr("fill","rgba(0,0,0,0)")
         .attr("stroke","rgba(0,0,0,1)")
+        //.attr("y", function(t){return(y(t.title));})
+        .attr("y", function(t) {return 80;})
         .attr("height",20)
         .attr("width", 100);
 
 
 });
+
+function headingTimeLimits(h){
+    var lim  = [cfg.bigbang,cfg.bigcrunch];
+    var plns = h.plannings;
+    if (plns.hasOwnProperty('CLOSED')){
+        lim[1] = orgToDate(section.sectionPlannings.CLOSED.tsTime);
+    }
+    if (plns.hasOwnProperty('DEADLINE')){
+        lim[1] = orgToDate(section.sectionPlannings.DEADLINE.tsTime);
+    }
+    if (plns.hasOwnProperty('SCHEDULED')){
+        lim[0] = orgToDate(section.sectionPlannings.DEADLINE.tsTime);
+    }
+}
+
+function orgTSToTime(ots){
+    var ts;
+    var ymd = ots.yearMonthDay;
+    if (ots.hourMinute == undefined){
+        ts = new Date(ymd.ymdYear,ymd.ymdMonth,ymd.ymdDay);
+    } else {
+        var hm = ots.hourMinute;
+        ts = new Date(ymd.ymdYear,ymd.ymdMonth,ymd.ymdDay,hm[0],hm[1]);
+    }
+    return ts;
+}
