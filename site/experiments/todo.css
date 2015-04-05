@@ -20,7 +20,7 @@
 }
 
 svg {
-    background-color: rgba(0,0,255,0.1);
+    background-color: rgba(0,0,255,0.01);
 }
 
 g {
@@ -29,4 +29,12 @@ g {
 
 .bar {
     background-color: red;
+}
+
+rect {
+    fill: hsla(200,50%,50%,0.8);
+}
+
+rect:hover {
+    fill: hsla(200,50%,50%,1);
 }

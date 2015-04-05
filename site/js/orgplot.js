@@ -20,16 +20,6 @@ var margin = {top: 10, bottom: 50, left: 50, right: 50},
     width  = 500 - margin.left - margin.right,
     height = 300 - margin.top  - margin.bottom;
 
-var x = d3.scale.linear()
-         .domain([cfg.bigbang, cfg.bigcrunch])
-         .range([0, 300]);
-
-var xAxis = d3.svg.axis()
-        .scale(x)
-        .ticks(2)
-        .orient("top");
-
-
 // Utility function
 function headingTags(h,s){
     h.tags.forEach(function(t) {s.add(t);});
@@ -65,45 +55,75 @@ d3.json("todo.json", function(error,data){
     t.enter().append("div")
         .text( function(d) {return d;});
 
+    var nHeadings = data.documentHeadings.length;
+    hs = _.zip(_.range(nHeadings), d.documentHeadings);
+
+    //var y = d3.scale.ordinal()
+    //        .domain(_.range(nHeadings))
+    //        .rangeRoundBands([0,height], 0.1);
+    var y = d3.scale.ordinal()
+            .rangeRoundBands([0,height], 0.1)
+            .domain( _.range(nHeadings) );
+
+    var yAxis = d3.svg.axis()
+            .scale(y)
+            .orient("left");
+
+    var x = d3.scale.linear()
+            .domain([cfg.bigbang, cfg.bigcrunch])
+            .range([0, width]);
+
+    var xAxis = d3.svg.axis()
+        .scale(x)
+        .ticks(2)
+        .orient("//TODO: op");
+
+
     chart.append("g")
         .attr("class","x axis")
         .attr("transform","translate(0," + height + ")")
         .call(xAxis);
-    //hs = d3.select(".headlinesDiv").selectAll("div")
-    //     .data(data.documentHeadings);
 
-    var y = d3.scale.ordinal()
-            .rangeRoundBands([0,height], 0.1);
+    chart.append("g")
+        .attr("class","y axis")
+        .call(yAxis);
 
-    y.domain(data.documentHeadings.map(function(h){return (h.title);}));
-
-    chart.selectAll(".headlinesChart")
-        .data(data.documentHeadings)
-      .enter().append("div")
+    chart.selectAll(".headlineBar")
+        .data(hs)
+      .enter().append("rect")
         .attr("class","headingDiv2")
-        .text( function(dh) {return dh.title;} )
-        .attr("fill","rgba(0,0,0,0)")
-        .attr("stroke","rgba(0,0,0,1)")
-        //.attr("y", function(t){return(y(t.title));})
-        .attr("y", function(t) {return 80;})
-        .attr("height",20)
-        .attr("width", 100);
-
+        .attr("stroke","rgba(0,0,0,0)")
+        .attr("y", function(t){return(y(t[0]));})
+        .attr("x", function(t){
+            var l = headingTimeLimits(t);
+            return x(l[0]);
+        })
+        .attr("height",y.rangeBand())
+        .attr("width", function(t){
+            var l = headingTimeLimits(t);
+            return x(l[1]) - x(l[0]);
+        });
 
 });
 
+function decorateHeadings(indAndHeading){
+    var i = indAndHeading[0];
+    var h = indAndHeading[1];
+    console.log('TEST' + indAndHeading);
+}
 function headingTimeLimits(h){
     var lim  = [cfg.bigbang,cfg.bigcrunch];
-    var plns = h.plannings;
+    var plns = h[1].section.sectionPlannings;
     if (plns.hasOwnProperty('CLOSED')){
-        lim[1] = orgToDate(section.sectionPlannings.CLOSED.tsTime);
+        lim[1] = orgTSToTime(plns.CLOSED.tsTime);
     }
     if (plns.hasOwnProperty('DEADLINE')){
-        lim[1] = orgToDate(section.sectionPlannings.DEADLINE.tsTime);
+        lim[1] = orgTSToTime(plns.DEADLINE.tsTime);
     }
     if (plns.hasOwnProperty('SCHEDULED')){
-        lim[0] = orgToDate(section.sectionPlannings.DEADLINE.tsTime);
+        lim[0] = orgTSToTime(plns.DEADLINE.tsTime);
     }
+    return lim;
 }
 
 function orgTSToTime(ots){
