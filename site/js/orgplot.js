@@ -58,9 +58,6 @@ d3.json("todo.json", function(error,data){
     var nHeadings = data.documentHeadings.length;
     hs = _.zip(_.range(nHeadings), d.documentHeadings);
 
-    //var y = d3.scale.ordinal()
-    //        .domain(_.range(nHeadings))
-    //        .rangeRoundBands([0,height], 0.1);
     var y = d3.scale.ordinal()
             .rangeRoundBands([0,height], 0.1)
             .domain( _.range(nHeadings) );
@@ -75,9 +72,8 @@ d3.json("todo.json", function(error,data){
 
     var xAxis = d3.svg.axis()
         .scale(x)
-        .ticks(2)
-        .orient("//TODO: op");
-
+        .ticks(3)
+        .orient("up");
 
     chart.append("g")
         .attr("class","x axis")
@@ -90,10 +86,17 @@ d3.json("todo.json", function(error,data){
 
     chart.selectAll(".headlineBar")
         .data(hs)
-      .enter().append("rect")
+      .enter().append("g")
+        .attr("class","headlineBar")
+        .attr("transform",function(ih){
+            return "translate(0," +y(ih[0]) + ")";
+        });
+
+    var bars = chart.selectAll(".headlineBar");
+
+    bars.append("rect")
         .attr("class","headingDiv2")
         .attr("stroke","rgba(0,0,0,0)")
-        .attr("y", function(t){return(y(t[0]));})
         .attr("x", function(t){
             var l = headingTimeLimits(t);
             return x(l[0]);
@@ -104,6 +107,12 @@ d3.json("todo.json", function(error,data){
             return x(l[1]) - x(l[0]);
         });
 
+    bars.append("text")
+        .text(function(h){return h[1].title;})
+        .attr("transform",function(ih){
+            var yOff = y.rangeBand() / 2;
+            return "translate(0," + yOff + ")";
+        });
 });
 
 function decorateHeadings(indAndHeading){

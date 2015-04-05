@@ -23,6 +23,10 @@ svg {
     background-color: rgba(0,0,255,0.01);
 }
 
+svg text{
+    font-family: 'Source Sans Pro', sans-serif;
+}
+
 g {
     background-color: rgba(0,255,0,0.4);
 }
