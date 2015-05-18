@@ -20,26 +20,31 @@ import           Data.OrgMode.Parse.Attoparsec.Document
 import           Data.OrgMode.Parse.Types
 
 myOrgUrl :: String
-myOrgUrl = "file:///home/greghale/Programming/CBMM.github.io/site/experiments/todo.org"
+--myOrgUrl = "file:///home/greghale/Programming/CBMM.github.io/site/experiments/todo.org"
+--myOrgUrl = "https://raw.githubusercontent.com/CBMM/CBMM.github.io/master/site/experiments/todo.org"
+myOrgUrl = "https://cdn.rawgit.com/CBMM/CBMM.github.io/master/site/experiments/todo.org"
 
 main :: IO ()
 main = mainWidget $ mdo
 
+  circleWidget
   refreshClick <- button "Refresh org data"
   fetchOrgTriggers <- appendEvents refreshClick <$> getPostBuild
   -- TODO: Data doesn't change on reload after changing todo.org. why?
   orgEvents <- flip fforMaybe (either (const Nothing) Just) <$> fetchOrgFile fetchOrgTriggers
   orgData <- holdDyn (Document "No document yet" [])
              orgEvents
-  orgWidget orgData
-  -- dynText =<< mapDyn show orgData
+  el "div" $ orgWidget orgData
+  --dynText =<< mapDyn show orgData
   return ()
 
 fetchOrgFile :: (MonadWidget t m)
              => Event t a
              -> m (Event t (Either String Document))
 fetchOrgFile trigger =
-  let orgReq = XhrRequest "GET" myOrgUrl def
+  let orgReq = XhrRequest "GET" myOrgUrl $
+               def --{_xhrRequestConfig_headers =
+                   -- Map.fromList [("Origin","raw.githubusercontent.com")]}
       repMap = maybe (Left "No data")
                (T.parseOnly (parseDocument ["TODO","DONE"]))
   in do
@@ -57,7 +62,7 @@ orgWidget :: (MonadWidget t m) => Dynamic t (Document) -> m (Dynamic t A.Value)
 orgWidget docDyn = do
 
   docDyn       <- forDyn docDyn (\doc -> Map.fromList $ zip [0..] (documentHeadings doc))
-  elAttr "svg" (Map.fromList [("width","100"),("height","100"),("style","backgrond-color:green")]) $ do
+  elAttr "svg" (Map.fromList [("width","300"),("height","300"),("style","backgrond-color:green")]) $ do
     headingInfos <- listViewWithKey docDyn $ \k h -> do
       orgHeadingWidget (constDyn xAxis0) k h
     return (constDyn $ A.Object $ HM.fromList [])
@@ -131,3 +136,12 @@ tToX XAxisConfig{..} t =
         | otherwise   = xStart
       x = xNoZoom * (1-zFrac) + xFullZoom * zFrac
   in floor x
+
+circleWidget :: (MonadWidget t m) => m ()
+circleWidget = elAttr "svg" (Map.fromList [("width","200"),("height","100")]) $
+               elAttr "circle" (Map.fromList [("cx","50")
+                                             ,("cy","50")
+                                             ,("r","40")
+                                             ,("stroke","green")
+                                             ,("stroke-width","4")
+                                             ,("fill","yellow")]) (return ())
