@@ -11,23 +11,43 @@ import qualified Data.ByteString.Lazy as BSL
 import           Data.Either
 import qualified Data.HashMap.Strict  as HM
 import qualified Data.Map             as Map
+import           Data.Maybe
 import qualified Data.Text            as T
 import           Data.Time
 import           Data.Time.Clock
 import           Reflex.Dom
+import qualified Data.Text.Lazy       as TL
+import           Diagrams.Prelude     hiding (Dynamic, section, el)
+import           Diagrams.Backend.SVG
+import           Lucid.Svg            hiding ((<>))
 
 import           Data.OrgMode.Parse.Attoparsec.Document
 import           Data.OrgMode.Parse.Types
+
+import Axis
+
+
 
 myOrgUrl :: String
 --myOrgUrl = "file:///home/greghale/Programming/CBMM.github.io/site/experiments/todo.org"
 --myOrgUrl = "https://raw.githubusercontent.com/CBMM/CBMM.github.io/master/site/experiments/todo.org"
 myOrgUrl = "https://cdn.rawgit.com/CBMM/CBMM.github.io/master/site/experiments/todo.org"
 
+
+headingTimes :: Heading -> (Maybe UTCTime, Maybe UTCTime)
+headingTimes heading =
+  case sectionPlannings . section $ heading of
+   Plns ps -> ((dateTimeToUTC . tsTime) <$> HM.lookup SCHEDULED ps,
+               (dateTimeToUTC . tsTime) <$> HM.lookup CLOSED ps)
+
+clockTimes :: Timestamp -> (Maybe UTCTime, Maybe UTCTime)
+clockTimes (Timestamp t0 _ mT1) = (dateTimeToUTC <$> Just t0,
+                                   dateTimeToUTC <$> mT1)
+
 main :: IO ()
 main = mainWidget $ mdo
 
-  circleWidget
+  diagramWidget "head circle" (circle 100)
   refreshClick <- button "Refresh org data"
   fetchOrgTriggers <- appendEvents refreshClick <$> getPostBuild
   -- TODO: Data doesn't change on reload after changing todo.org. why?
@@ -35,8 +55,22 @@ main = mainWidget $ mdo
   orgData <- holdDyn (Document "No document yet" [])
              orgEvents
   el "div" $ orgWidget orgData
-  --dynText =<< mapDyn show orgData
+  el "hr" (return ())
+  dynText =<< mapDyn show orgData
   return ()
+
+headingDiagram :: Int -> XAxisConfig -> Heading -> HeadingDiagram
+headingDiagram i xConf@XAxisConfig{..} heading =
+  mconcat (clockWindows ++ githubCommits ++ [background])
+
+  where
+
+    background    = timeRectMay xConf (headingTimes heading)
+    clockWindows  = map (timeRectMay xConf . clockTimes) .
+                    catMaybes . map fst .
+                    sectionClocks . section $ heading
+    githubCommits = []
+
 
 fetchOrgFile :: (MonadWidget t m)
              => Event t a
@@ -71,9 +105,22 @@ orgHeadingWidget :: (MonadWidget t m)
                  => (Dynamic t XAxisConfig)
                  -> Int
                  -> Dynamic t Heading
-                 -> m (Event t T.Text)
-orgHeadingWidget xConfig k heading = do
+                 -> m (Event t A.Value)
+--                 -> m (Event t T.Text)
+orgHeadingWidget xConfig k headingDyn = do
+  dynSvgs <- combineDyn (headingDiagram k) xConfig headingDyn
+  diagramWidget "test" dynSvgs
+  return never
 
+diagramWidget :: MonadWidget t m => T.Text -> Dynamic t HeadingDiagram -> m ()
+diagramWidget diaName d = elDynHtml' "div" (constDyn h) >> return ()
+  where h = TL.unpack . renderText $
+            renderDia SVG (SVGOptions spec Nothing diaName) d
+        spec = mkSizeSpec2D (Just 300 :: Maybe Double) (Just 50)
+
+
+
+{- Leftover code from orgHeadingWidget
   boxAttrsDyn <- combineDyn attrFun xConfig heading
   elDynAttr "rect" boxAttrsDyn $
     dynText =<< mapDyn (T.unpack . title) heading
@@ -97,51 +144,4 @@ orgHeadingWidget xConfig k heading = do
                        ,("height", show height)
                        ,("y", show (height*k))
                        ]
-
-dateTimeToUTC :: DateTime -> UTCTime
-dateTimeToUTC (DateTime (YMD' (YearMonthDay y m d)) _ mayHourMin _ _) =
-  let theHour = maybe 0 fst mayHourMin
-      theMin  = maybe 0 snd mayHourMin
-      secsIn  = 60*60*theHour + 60*theMin
-  in  UTCTime (fromGregorian (fromIntegral y) m d) (fromIntegral secsIn)
-
-data XAxisConfig = XAxisConfig {
-  tStart   :: UTCTime
-  , tEnd   :: UTCTime
-  , tFocus :: UTCTime
-  , xStart :: Double
-  , xEnd   :: Double
-  , zFrac  :: Double
-  }
-
-xAxis0 :: XAxisConfig
-xAxis0 = XAxisConfig {
-  tStart = UTCTime (fromGregorian 2014 1 1) 0
-  , tEnd = UTCTime (fromGregorian 2017 1 1) 0
-  , xStart = 10
-  , xEnd   = 210
-  , tFocus  = UTCTime (fromGregorian 2016 5 20) 0
-  , zFrac = 0.5
-  }
-
-tToX :: XAxisConfig -> UTCTime -> Int
-tToX XAxisConfig{..} t =
-  let r2 = realToFrac :: Real x => x -> Double
-      m = (xEnd - xStart) /
-          realToFrac (diffUTCTime tEnd tStart)
-      xNoZoom   = (r2 $ diffUTCTime t tStart) * m + xStart
-      xFullZoom
-        | t == tFocus = xNoZoom
-        | t >  tFocus = xEnd
-        | otherwise   = xStart
-      x = xNoZoom * (1-zFrac) + xFullZoom * zFrac
-  in floor x
-
-circleWidget :: (MonadWidget t m) => m ()
-circleWidget = elAttr "svg" (Map.fromList [("width","200"),("height","100")]) $
-               elAttr "circle" (Map.fromList [("cx","50")
-                                             ,("cy","50")
-                                             ,("r","40")
-                                             ,("stroke","green")
-                                             ,("stroke-width","4")
-                                             ,("fill","yellow")]) (return ())
+-}
