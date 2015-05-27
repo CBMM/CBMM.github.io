@@ -33,11 +33,11 @@ data XAxisConfig = XAxisConfig {
 
 xAxis0 :: XAxisConfig
 xAxis0 = XAxisConfig {
-  tStart = UTCTime (fromGregorian 2014 1 1) 0
+  tStart = UTCTime (fromGregorian 2014 5 1) 0
   , tEnd = UTCTime (fromGregorian 2017 1 1) 0
   , xStart = 10
-  , xEnd   = 210
-  , tFocus  = UTCTime (fromGregorian 2016 5 20) 0
+  , xEnd   = 510
+  , tFocus  = UTCTime (fromGregorian 2015 5 20) 0
   , zFrac = 0.5
   }
 
