@@ -29,9 +29,9 @@ import Axis
 
 
 myOrgUrl :: String
---myOrgUrl = "file:///home/greghale/Programming/CBMM.github.io/site/experiments/todo.org"
+myOrgUrl = "file:///home/greghale/Programming/CBMM.github.io/site/experiments/todo.org"
 --myOrgUrl = "https://raw.githubusercontent.com/CBMM/CBMM.github.io/master/site/experiments/todo.org"
-myOrgUrl = "https://cdn.rawgit.com/CBMM/CBMM.github.io/master/site/experiments/todo.org"
+--myOrgUrl = "https://cdn.rawgit.com/CBMM/CBMM.github.io/master/site/experiments/todo.org"
 
 
 headingTimes :: Heading -> (Maybe UTCTime, Maybe UTCTime)
@@ -47,16 +47,16 @@ clockTimes (Timestamp t0 _ mT1) = (dateTimeToUTC <$> Just t0,
 main :: IO ()
 main = mainWidget $ mdo
 
-  diagramWidget "head circle" (circle 100)
+  --diagramWidget "head circle" (circle 100)
   refreshClick <- button "Refresh org data"
   fetchOrgTriggers <- appendEvents refreshClick <$> getPostBuild
   -- TODO: Data doesn't change on reload after changing todo.org. why?
-  orgEvents <- flip fforMaybe (either (const Nothing) Just) <$> fetchOrgFile fetchOrgTriggers
-  orgData <- holdDyn (Document "No document yet" [])
-             orgEvents
-  el "div" $ orgWidget orgData
+  --orgEvents <- flip fforMaybe (either (const Nothing) Just) <$> fetchOrgFile fetchOrgTriggers
+  --orgData <- holdDyn (Document "No document yet" [])
+  --           orgEvents
+  -- el "div" $ orgWidget orgData
   el "hr" (return ())
-  dynText =<< mapDyn show orgData
+  --dynText =<< mapDyn show orgData
   return ()
 
 headingDiagram :: Int -> XAxisConfig -> Heading -> HeadingDiagram
@@ -112,10 +112,10 @@ orgHeadingWidget xConfig k headingDyn = do
   diagramWidget "test" dynSvgs
   return never
 
-diagramWidget :: MonadWidget t m => T.Text -> Dynamic t HeadingDiagram -> m ()
-diagramWidget diaName d = elDynHtml' "div" (constDyn h) >> return ()
-  where h = TL.unpack . renderText $
-            renderDia SVG (SVGOptions spec Nothing diaName) d
+diagramWidget :: MonadWidget t m => T.Text -> Dynamic t HeadingDiagram -> m (El t)
+diagramWidget diaName d = elDynHtml' "div" =<< mapDyn h d
+  where h = TL.unpack . renderText .
+            renderDia SVG (SVGOptions spec Nothing diaName)
         spec = mkSizeSpec2D (Just 300 :: Maybe Double) (Just 50)
 
 
