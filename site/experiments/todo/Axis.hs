@@ -2,9 +2,10 @@
 
 module Axis where
 
+import qualified Data.HashMap.Strict as HM
 import Data.Time
 import Data.Time.Clock
-import Diagrams.Prelude
+import Diagrams.Prelude hiding (section)
 import Diagrams.Backend.SVG
 import Lucid.Svg hiding (translate)
 import Data.OrgMode.Parse.Types
@@ -38,7 +39,7 @@ xAxis0 = XAxisConfig {
   , xStart = 10
   , xEnd   = 510
   , tFocus  = UTCTime (fromGregorian 2015 5 20) 0
-  , zFrac = 0.5
+  , zFrac = 0.2
   }
 
 tToX :: XAxisConfig -> UTCTime -> Double
@@ -60,4 +61,15 @@ dateTimeToUTC (DateTime (YMD' (YearMonthDay y m d)) _ mayHourMin _ _) =
       theMin  = maybe 0 snd mayHourMin
       secsIn  = 60*60*theHour + 60*theMin
   in  UTCTime (fromGregorian (fromIntegral y) m d) (fromIntegral secsIn)
+
+
+headingTimes :: Heading -> (Maybe UTCTime, Maybe UTCTime)
+headingTimes heading =
+  case sectionPlannings . section $ heading of
+   Plns ps -> ((dateTimeToUTC . tsTime) <$> HM.lookup SCHEDULED ps,
+               (dateTimeToUTC . tsTime) <$> HM.lookup CLOSED ps)
+
+clockTimes :: Timestamp -> (Maybe UTCTime, Maybe UTCTime)
+clockTimes (Timestamp t0 _ mT1) = (dateTimeToUTC <$> Just t0,
+                                   dateTimeToUTC <$> mT1)
 

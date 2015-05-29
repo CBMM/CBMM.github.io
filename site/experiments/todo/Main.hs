@@ -26,6 +26,7 @@ import           Data.OrgMode.Parse.Attoparsec.Document
 import           Data.OrgMode.Parse.Types
 
 import Axis
+import HeadingDiagram
 
 
 
@@ -33,17 +34,6 @@ myOrgUrl :: String
 myOrgUrl = "file:///home/greghale/Programming/CBMM.github.io/site/experiments/todo.org"
 --myOrgUrl = "https://raw.githubusercontent.com/CBMM/CBMM.github.io/master/site/experiments/todo.org"
 --myOrgUrl = "https://cdn.rawgit.com/CBMM/CBMM.github.io/master/site/experiments/todo.org"
-
-
-headingTimes :: Heading -> (Maybe UTCTime, Maybe UTCTime)
-headingTimes heading =
-  case sectionPlannings . section $ heading of
-   Plns ps -> ((dateTimeToUTC . tsTime) <$> HM.lookup SCHEDULED ps,
-               (dateTimeToUTC . tsTime) <$> HM.lookup CLOSED ps)
-
-clockTimes :: Timestamp -> (Maybe UTCTime, Maybe UTCTime)
-clockTimes (Timestamp t0 _ mT1) = (dateTimeToUTC <$> Just t0,
-                                   dateTimeToUTC <$> mT1)
 
 main :: IO ()
 main = mainWidget $ mdo
@@ -61,8 +51,8 @@ main = mainWidget $ mdo
   dynText =<< mapDyn show orgData
   return ()
 
-headingDiagram :: Int -> XAxisConfig -> Heading -> HeadingDiagram
-headingDiagram i xConf@XAxisConfig{..} heading =
+headingDiagram' :: Int -> XAxisConfig -> Heading -> HeadingDiagram
+headingDiagram' i xConf@XAxisConfig{..} heading =
   mconcat (clockWindows ++ githubCommits ++ [background])
 
   where

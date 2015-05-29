@@ -21,6 +21,7 @@ executable todo
                        aeson,
                        attoparsec,
                        bytestring,
+                       colour,
                        containers,
                        diagrams-lib,
                        diagrams-svg,
