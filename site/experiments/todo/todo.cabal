@@ -28,6 +28,7 @@ executable todo
                        errors,
                        lucid-svg,
                        orgmode-parse,
+                       palette,
                        reflex-dom,
                        safe,
                        text,

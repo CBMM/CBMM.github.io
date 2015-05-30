@@ -1,6 +1,10 @@
-* Project 1
-  CLOCK: [2015-04-26 Thu 23:33]--[2015-05-28 Thu 23:33] =>  0:00
+* DONE [#A] Project 1
+  SCHEDULED: <2015-05-03 Sun>
 
-* Project 2
+* DONE [#B] Project 2
   CLOCK: [2015-05-06 Thu 23:33]--[2015-05-28 Thu 23:33] =>  0:00
+
+* [#C] Project 3
+  CLOCK: [2015-06-06 Thu 23:33]--[2015-06-30 Thu 23:33] =>  0:00
+
 

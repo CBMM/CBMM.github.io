@@ -11,6 +11,8 @@ import Diagrams.Backend.SVG
 import Lucid.Svg hiding (translate)
 import Data.OrgMode.Parse.Types
 
+type MySvg = Svg ()
+
 -- TODO: Move these to Utils
 showT :: Show a => a -> T.Text
 showT = T.pack . show
@@ -18,17 +20,16 @@ showT = T.pack . show
 showF :: (RealFrac a, Show a) => a -> T.Text
 showF = T.pack . show . floor
 
-timeRect :: XAxisConfig -> UTCTime -> UTCTime -> Svg ()
+timeRect :: XAxisConfig -> UTCTime -> UTCTime -> MySvg
 timeRect axis@XAxisConfig{..} t0 t1 =
   let [x0,x1] = map (tToX axis) [t0,t1] :: [Double]
   in  rect_ [x_ (showF x0)
             , width_ (showF (x1-x0))
-            , height_ (showF 1)
             ]
 
 timeRectMay :: XAxisConfig
             -> (Maybe UTCTime,Maybe UTCTime)
-            -> Svg ()
+            -> MySvg
 timeRectMay axis@XAxisConfig{..} (mT0, mT1) =
   timeRect axis (maybe tStart id mT0) (maybe tEnd id mT1)
 

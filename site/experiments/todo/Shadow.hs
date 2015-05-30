@@ -14,7 +14,13 @@ shadowDefs x y blur filtId = defs_ $ do
   (term "filter") fParams $ do
     feOffset_       [result_ "offOut", in_ "SourceAlpha"
                     , dx_ (T.pack $ show x), dy_ (T.pack $ show y)]
-    feGaussianBlur_ [result_ "blurOut", in_ "offOut"
+    feColorMatrix_  [result_ "matrixOut", in_ "offOut"
+                    , type_ "matrix"
+                    , values_ "1 0 0 0 0   0 1 0 0 0  0 0 1 0 0  0 0 0 0.5 0"]
+    --feFlood_        [result_ "floodOut", in_ "offOut"
+    --                , flood_color_ "rgba(0,0,0,0.1)"
+    --                , flood_opacity_ "1"]
+    feGaussianBlur_ [result_ "blurOut", in_ "matrixOut"
                     , stdDeviation_ (T.pack $ show blur)]
     feBlend_        [in_ "SourceGraphic", in2_ "blurOut"
                     , mode_ "normal"]

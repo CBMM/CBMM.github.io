@@ -10,10 +10,12 @@ import           Control.Monad.IO.Class (liftIO)
 import qualified Data.Attoparsec.Text as T
 import qualified Data.Aeson           as A
 import qualified Data.ByteString.Lazy as BSL
+import           Data.Foldable
 import           Data.Either
 import qualified Data.HashMap.Strict  as HM
 import qualified Data.Map             as Map
 import           Data.Maybe
+import           Data.Monoid
 import qualified Data.Text            as T
 import           Data.Time
 import           Data.Time.Calendar.WeekDate
@@ -28,7 +30,11 @@ import           Data.OrgMode.Parse.Types
 import Axis
 import HeadingDiagram
 
+--showT :: Show a => a -> T.Text
+--showT = T.pack . show
 
+--showF :: RealFrac a => a -> T.Text
+--showF = T.pack . show . floor
 
 myOrgUrl :: String
 #ifdef __GHCJS__
@@ -53,7 +59,7 @@ main = mainWidget $ mdo
   dynText =<< mapDyn show orgData
   return ()
 
-headingDiagram' :: Int -> XAxisConfig -> Heading -> SvgT m ()
+headingDiagram' :: Int -> XAxisConfig -> Heading -> MySvg
 headingDiagram' i xConf@XAxisConfig{..} heading =
   mconcat (clockWindows ++ githubCommits ++ [background])
 
@@ -88,12 +94,20 @@ data GithubCommit = GithubCommit {
 orgWidget :: (MonadWidget t m) => Dynamic t (Document) -> m (Dynamic t A.Value)
 orgWidget docDyn = do
 
-  docDyn       <- forDyn docDyn (\doc -> Map.fromList $ zip [0..] (documentHeadings doc))
-  --elAttr "svg" (Map.fromList [("width","300"),("height","300"),("style","backgrond-color:green")]) $ do
-  headingInfos <- listViewWithKey docDyn $ \k h -> do
-    orgHeadingWidget (constDyn xAxis0) k h    --  TODO: Update the xAxisConfig on clicks
-  diagramWidget "xaxis" $ constDyn (timeLegend (xAxis0))                --  TODO: Update xaxis clicks
+  --docHeadings <- forDyn docDyn (\doc -> zip [0..] (documentHeadings doc))
+  --(headingInfos) <- listViewWithKey docDyn $ \k h -> do
+  --  orgHeadingWidget (constDyn xAxis0) k h   --  TODO: Update the axis on clicks
+  --svgWidget $ constDyn (mconcat (zipWith (headingDiagram )[0..length docHeadings - 1] docHeadings))
+  --svgWidget $ constDyn (timeLegend (xAxis0)) --  TODO: Update xaxis clicks
+  dynSvg <- combineDyn orgSvg (constDyn xAxis0) docDyn
+  svgWidget dynSvg
   return (constDyn $ A.Object $ HM.fromList [])
+
+orgSvg :: XAxisConfig -> Document -> MySvg
+orgSvg axis doc = g_ $ do
+  mconcat (zipWith (headingDiagram axis) [0..length hs - 1] hs)
+  timeLegend axis
+    where hs = documentHeadings doc
 
 orgHeadingWidget :: (MonadWidget t m)
                  => (Dynamic t XAxisConfig)
@@ -101,12 +115,18 @@ orgHeadingWidget :: (MonadWidget t m)
                  -> Dynamic t Heading
                  -> m (Event t A.Value)
 orgHeadingWidget xConfig k headingDyn = do
-  dynSvgs <- combineDyn (headingDiagram k) xConfig headingDyn
-  diagramWidget "test" dynSvgs
-  return never
+  dynHeadingSvg <- combineDyn (\c h -> headingDiagram c k h) xConfig headingDyn
+  svgWidget dynHeadingSvg
+  return (never)
 
-svgWidget :: MonadWidget t m => Dynamic t (SvgT m ()) -> m (El t)
-svgWidget d = elDynHtml' "div" =<< mapDyn renderText d
+svgWidget :: MonadWidget t m => Dynamic t MySvg -> m (El t)
+svgWidget d = elDynHtml' "div" =<< mapDyn (TL.unpack . renderText . svg) d
+
+
+svg :: Svg () -> Svg ()
+svg content = do
+  doctype_
+  with (svg11_ content) [width_ "800", height_ "800", version_ "1.1"]
 
 {-
 diagramWidget :: MonadWidget t m => T.Text -> Dynamic t HeadingDiagram -> m (El t)
@@ -117,7 +137,7 @@ diagramWidget diaName d = elDynHtml' "div" =<< mapDyn h d
 -}
 
 ------------------------------------------------------------------------------
-timeLegend :: XAxisConfig -> SvgT m ()
+timeLegend :: XAxisConfig -> MySvg
 timeLegend xConf@XAxisConfig{..} = legendDia
   where
       isBetween t t0 t1         = t >= t0 && t <= t1
@@ -157,7 +177,7 @@ timeLegend xConf@XAxisConfig{..} = legendDia
       toStr = formatTime defaultTimeLocale
 
       --baseLine = P (V2 (toX tStart) 0) ~~ P (V2 (toX tEnd) 0) # strokeP
-      baseLine = line_ [x1_ (showF (toX tStart)), x2_ (show0 (toX tEnd))
+      baseLine = line_ [x1_ (showF (toX tStart)), x2_ (showF (toX tEnd))
                        ,y1_ (showF 0), y2_ (showF 0)]
 
       --tickDia :: (UTCTime,String,Double) -> HeadingDiagram
@@ -169,13 +189,11 @@ timeLegend xConf@XAxisConfig{..} = legendDia
       --                     Diagrams.Prelude.text (toStr fmt t)
       --  in  labelAndTick # Diagrams.Prelude.translate (V2 (toX t) 0)
 
-      tickDia :: (UTCTime, String, Double) -> SvgT m ()
       tickDia (t,fmt,wght) = do
         line_ [x1_ (showF (toX t)), x2_ (showF (toX t))
-              ,y1_ "0", y2_ (showF (10*t - 5*wght))]
-        with (text_ (T.pack (toStr fmt))) [x_ (showF (toX t)), y_ "20"]
+              ,y1_ "0", y2_ (showF (-10 - 5*wght))]
+        --text_ [x_ (showF (toX t)), y_ "20"] (T.pack $ toStr fmt t)
 
-      legendDia =
+      legendDia = g_ $ do
         baseLine
-        <>
         mconcat (map tickDia (yearLabels ++ monthLabels ++ wkDayLabels))
