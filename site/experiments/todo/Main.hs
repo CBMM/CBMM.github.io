@@ -1,3 +1,4 @@
+{-# LANGUAGE CPP               #-}
 {-# LANGUAGE RecursiveDo       #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards   #-}
@@ -5,6 +6,7 @@
 module Main where
 
 import Control.Error (note)
+import           Control.Monad.IO.Class (liftIO)
 import qualified Data.Attoparsec.Text as T
 import qualified Data.Aeson           as A
 import qualified Data.ByteString.Lazy as BSL
@@ -31,16 +33,18 @@ import HeadingDiagram
 
 
 myOrgUrl :: String
+#ifdef __GHCJS__
+myOrgUrl = "https://cdn.rawgit.com/CBMM/CBMM.github.io/master/site/experiments/todo.org"
+#else
 myOrgUrl = "file:///home/greghale/Programming/CBMM.github.io/site/experiments/todo.org"
---myOrgUrl = "https://raw.githubusercontent.com/CBMM/CBMM.github.io/master/site/experiments/todo.org"
---myOrgUrl = "https://cdn.rawgit.com/CBMM/CBMM.github.io/master/site/experiments/todo.org"
+#endif
 
 main :: IO ()
 main = mainWidget $ mdo
 
+  Reflex.Dom.text (myOrgUrl)
   --diagramWidget "head circle" (circle 100)
   refreshClick <- button "Refresh org data"
-  Reflex.Dom.text "Tello"
   fetchOrgTriggers <- appendEvents refreshClick <$> getPostBuild
   -- TODO: Data doesn't change on reload after changing todo.org. why?
   orgEvents <- flip fforMaybe (either (const Nothing) Just) <$> fetchOrgFile fetchOrgTriggers

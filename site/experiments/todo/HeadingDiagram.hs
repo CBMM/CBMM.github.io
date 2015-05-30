@@ -9,15 +9,16 @@ import Lucid.Svg hiding (translate)
 import Data.OrgMode.Parse.Types
 
 import Axis
+import Shadow
 
 hBoxHeight :: Double
 hBoxHeight = 70
 
 headingBackColor = fromAlphaColour $ withOpacity green 1
 
-trimColor = fromAlphaColour $ withOpacity white 0.5
+trimColor = fromAlphaColour $ withOpacity white 1
 
-clockBoxColor = fromAlphaColour $ withOpacity white 0.25
+clockBoxColor = fromAlphaColour $ withOpacity white 1
 
 ------------------------------------------------------------------------------
 headingDiagram :: Int -> XAxisConfig -> Heading -> HeadingDiagram
@@ -34,6 +35,7 @@ headingBackRect :: XAxisConfig -> Heading -> HeadingDiagram
 headingBackRect axis h =
   timeRectMay axis (headingTimes h)
   # scaleY hBoxHeight
+  # lw   none
   # fc   headingBackColor
 
 headingBackTrim :: XAxisConfig -> Heading -> HeadingDiagram
@@ -46,10 +48,11 @@ headingBackTrim axis h =
                  ~~
                  (P $ V2 (toX (maybe (tEnd axis) id t1)) 0))
                  # strokeP
-  in (oneLine # translateY (hBoxHeight / 2 - 5)
+  in (oneLine # translateY (hBoxHeight / 2 - 10)
       `atop`
-      oneLine # translateY (5 - hBoxHeight / 2))
+      oneLine # translateY (10 - hBoxHeight / 2))
      # lc trimColor
+     # opacity 0.5
 
 clockBlock :: XAxisConfig -> Timestamp -> HeadingDiagram
 clockBlock axis (Timestamp dateTime0 _ Nothing) =
@@ -60,3 +63,5 @@ clockBlock axis (Timestamp dateTime0 _ (Just dateTime1)) =
   timeRect axis (dateTimeToUTC dateTime0) (dateTimeToUTC dateTime1)
   # scaleY hBoxHeight
   # fc clockBoxColor
+  # lw none
+  # opacity 0.10
