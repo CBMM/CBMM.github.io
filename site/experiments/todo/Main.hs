@@ -20,8 +20,6 @@ import           Data.Time.Calendar.WeekDate
 import           Data.Time.Clock
 import           Reflex.Dom
 import qualified Data.Text.Lazy       as TL
-import           Diagrams.Prelude     hiding (Dynamic, section, el)
-import           Diagrams.Backend.SVG
 import           Lucid.Svg            hiding ((<>))
 
 import           Data.OrgMode.Parse.Attoparsec.Document
@@ -55,7 +53,7 @@ main = mainWidget $ mdo
   dynText =<< mapDyn show orgData
   return ()
 
-headingDiagram' :: Int -> XAxisConfig -> Heading -> HeadingDiagram
+headingDiagram' :: Int -> XAxisConfig -> Heading -> SvgT m ()
 headingDiagram' i xConf@XAxisConfig{..} heading =
   mconcat (clockWindows ++ githubCommits ++ [background])
 
@@ -73,8 +71,7 @@ fetchOrgFile :: (MonadWidget t m)
              -> m (Event t (Either String Document))
 fetchOrgFile trigger =
   let orgReq = XhrRequest "GET" myOrgUrl $
-               def --{_xhrRequestConfig_headers =
-                   -- Map.fromList [("Origin","raw.githubusercontent.com")]}
+               def
       repMap = maybe (Left "No data")
                (T.parseOnly (parseDocument ["TODO","DONE"]))
   in do
@@ -103,21 +100,24 @@ orgHeadingWidget :: (MonadWidget t m)
                  -> Int
                  -> Dynamic t Heading
                  -> m (Event t A.Value)
---                 -> m (Event t T.Text)
 orgHeadingWidget xConfig k headingDyn = do
   dynSvgs <- combineDyn (headingDiagram k) xConfig headingDyn
   diagramWidget "test" dynSvgs
   return never
 
+svgWidget :: MonadWidget t m => Dynamic t (SvgT m ()) -> m (El t)
+svgWidget d = elDynHtml' "div" =<< mapDyn renderText d
+
+{-
 diagramWidget :: MonadWidget t m => T.Text -> Dynamic t HeadingDiagram -> m (El t)
 diagramWidget diaName d = elDynHtml' "div" =<< mapDyn h d
   where h = TL.unpack . renderText .
             renderDia SVG (SVGOptions spec Nothing diaName)
         spec = mkSizeSpec2D (Just 600 :: Maybe Double) (Just 50)
-
+-}
 
 ------------------------------------------------------------------------------
-timeLegend :: XAxisConfig -> HeadingDiagram
+timeLegend :: XAxisConfig -> SvgT m ()
 timeLegend xConf@XAxisConfig{..} = legendDia
   where
       isBetween t t0 t1         = t >= t0 && t <= t1
@@ -156,15 +156,24 @@ timeLegend xConf@XAxisConfig{..} = legendDia
       toStr :: String -> UTCTime -> String
       toStr = formatTime defaultTimeLocale
 
-      baseLine = P (V2 (toX tStart) 0) ~~ P (V2 (toX tEnd) 0) # strokeP
-      tickDia :: (UTCTime,String,Double) -> HeadingDiagram
-      tickDia (t,fmt,wght) =
-        let p0 = P $ V2 0 0              :: Point V2 Double
-            p1 = P $ V2 0 (-10 - 2*wght) :: Point V2 Double
-            labelAndTick = (p0 ~~ p1 # strokeP)
-                           ===
-                           Diagrams.Prelude.text (toStr fmt t)
-        in  labelAndTick # Diagrams.Prelude.translate (V2 (toX t) 0)
+      --baseLine = P (V2 (toX tStart) 0) ~~ P (V2 (toX tEnd) 0) # strokeP
+      baseLine = line_ [x1_ (showF (toX tStart)), x2_ (show0 (toX tEnd))
+                       ,y1_ (showF 0), y2_ (showF 0)]
+
+      --tickDia :: (UTCTime,String,Double) -> HeadingDiagram
+      --tickDia (t,fmt,wght) =
+      --  let p0 = P $ V2 0 0              :: Point V2 Double
+      --      p1 = P $ V2 0 (-10 - 2*wght) :: Point V2 Double
+      --      labelAndTick = (p0 ~~ p1 # strokeP)
+      --                     ===
+      --                     Diagrams.Prelude.text (toStr fmt t)
+      --  in  labelAndTick # Diagrams.Prelude.translate (V2 (toX t) 0)
+
+      tickDia :: (UTCTime, String, Double) -> SvgT m ()
+      tickDia (t,fmt,wght) = do
+        line_ [x1_ (showF (toX t)), x2_ (showF (toX t))
+              ,y1_ "0", y2_ (showF (10*t - 5*wght))]
+        with (text_ (T.pack (toStr fmt))) [x_ (showF (toX t)), y_ "20"]
 
       legendDia =
         baseLine
