@@ -1,10 +1,23 @@
-* DONE [#A] Project 1
-  SCHEDULED: <2015-05-03 Sun>
+* [#A] Test project A                                     :Test:Project:
+SCHEDULED: <2015-05-13 Wed>
+CLOSED: <2015-06-13 Tue>
+CLOCK: [2015-05-30 Sat 22:28]--[2015-05-30 Sat 22:28] =>  0:00
+** DONE Sketch
+CLOSED: [2015-04-03 Fri 22:58] DEADLINE: <2015-04-08 Wed>
+** MVP
+   DEADLINE: <2015-04-12 Sun>
 
-* DONE [#B] Project 2
-  CLOCK: [2015-05-06 Thu 23:33]--[2015-05-28 Thu 23:33] =>  0:00
-
-* [#C] Project 3
-  CLOCK: [2015-06-06 Thu 23:33]--[2015-06-30 Thu 23:33] =>  0:00
-
-
+** Testsuite
+   DEADLINE: <2015-03-28 Sat>
+** Release
+DEADLINE: <2015-04-28 Tue>
+*                                     My title [0/1]              :Empty:
+** TODO Test
+* [#C] Test project A                                        :More tests:Homework:
+DEADLINE: <2015-05-14 Thu>
+CLOCK: [2015-05-30 Sat 22:28]--[2015-05-30 Sat 22:28] =>  0:00
+** Sketch
+** MVP
+** Testsuite
+   DEADLINE: <2015-05-02 Sat>
+** Release
