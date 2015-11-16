@@ -1,10 +1,62 @@
+#+STARTUP: align fold nodlcheck hidestars oddeven lognotestate
+#+TITLE: CBMM Projects
+#+AUTHOR: Greg Hale
+#+EMAIL: greghale@mit.edu
+#+LANGUAGE: en
+#+OPTIONS: d:nil
+#+HTML_HEAD_EXTRA: <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css"/>
+#+HTML_HEAD_EXTRA: <link rel="stylesheet" type="text/css" href="projects.css"/>
 * Development
-** Psychtest
-** Flycap
-CLOSED: [2015-03-21 Sat 10:07] DEADLINE: <2015-02-02 Mon>
-CLOCK: [2015-03-21 Sat 00:20]--[2015-03-21 Sat 00:20] =>  0:00
+** Tagging
+*** Stimulus annotation platform
+A unified platform for collecting stimulus tags from humans and algorithms. The tagging server keeps a database of stimulus sets and distributes them according to protocols defined by the researcher. Tagging clients are web pages (for human subjects), and an API accessible from several programming languages (for algorithmic subjects). Keeping a single platform for testing of humans and algorithms will make it easier to compare human and machine error patterns of mistakes, as we develop and assess AI systems that solve perception problems in human-like ways. Providing standard types for stimuli and responses will help different studies from different researchers contribute to a common pool of experimental data.
+*** Types of stimuli:
+**** Images
+**** Movie clips
+**** Sounds
+*** Types of annotations:
+**** Characters in clip
+**** Actions
+**** Low-level features (e.g. head direction)
+**** Speech transcripts
+**** Feelings about characters (good guy / bad guy)
+*** Users
+**** Leyla Isik (Kanwisher, Poggio, Kreiman labs)
+**** Hanlin Tang (Kreiman lab)
+**** Andrei Barbu (Katz lab)
+** Center for Brains, Minds and Machines as as Service (CBaaS) [[http://github.com/CBMM/CBaaS][Source]]
+*** Distribution platform for AI/ML/CV algorithms
+We want AI, machine learning, and computer vision research results to be durable, composable and immediately usable. CBaaS provides a matching service to apply various algorithms (such as a pre-trained deep neural net image classifier) to new stimuli of the users' choosing (such as a new compound stimulus not in the original training set, or a scrambled image produced by genetic recombination specifically to try to fool the classifier). Recently-produced algorithms can participate in the site through a well-documented API in a work-stealing arrangement. More mature algorithms maybe coded to run directly on the server, or as javascript on the user's own machine. Algorithms requiring special hardware can process image data as CBasS clients indefinitely.
+Another major goal of CBasS is the ability to introspect on algorithms, and to compose new ones from parts of old ones. For example, users may be interested in the activity levels of the 5th layer in a 6 layer image classifying net, or in retrieving the weights of one network to seed a new network that will will be trained on new images or with a different set of learning parameters.
+*** Users
+**** CBCL, Poggio group
+**** Eithan Meyers, Hampshire College
+** Unreal Learning Environment [[http://github.com/UnrealLearningEnvironment][Source]]
+Using the Unreal game engine for running psychophysics tests and testing embodied AI simulations, similar to the EMPATH project.
+*** Psychophysics
+**** Generate countless stmiuli (e.g. precarious block stackings for intuitive physics experiments)
+**** Demonstrate physical object interactions, allowing observers to build mental models of the objects (their relative weights, stickiness, attractive/repulsive forces)
+**** Run the simulation forward to provide feedback on predictions
+**** Model BCS building/Stata center for large-scale versions of Liz Spelke virtual/meat-space experiments
+*** Embodied AI
+**** Place AI controlled avatars in the physical environment
+**** Run image classifiers on first-person views from the avatars. "naturalistic" stimuli
+**** Test alternative pose recognition algorithms, like those based on inferred pressure in the EMPATH model
+*** Users/Collaborators
+**** Andrei Barbu
+**** Dan Yamins (DiCarlo lab)
+**** Tejas Kulkarni
+**** Tomer Ulman
+**** Zenna Tavares
+**** Will Whitney
+** Collaboration Tracker
+[[http://web.mit.edu/greghale/Public/collabplotb/collaborations.html][mockup]] [[https://github.com/imalsogreg/collabplot][source]]
+
+A fun visualization of collaborations evolving through CBMM. Will allow selection of individual PIs and projects, with links to external sites. Projects with github pages will have some kind of dynamic indicator of how much recent activity has gone on in that project.
 * Maintenance
 ** pipes-rt
+Real-time throttling for pipes coroutines, based on data timestamps or extrinsic timing signals
 ** snap testsuite
+Unit tests for the [[http://snapframework.com][snap]] web framework, which I use for all new projects
 * Teaching
 * Consults
