@@ -1,0 +1,213 @@
+% ELI4: Is HDF5 the future of open neuroscience data?
+% Authors: Jon Newman; Greg Hale
+% November 18, 2015
+
+Neuroscience is in a good place.
+After decades of vendor lock-in, propietary data formats, and closed-source analysis platforms, young neuroscientists are beginning to embrace a more open and collaborative style of building tools and practicing science.
+We look to our colleagues in other fields for inspiration and for hints about how to pool resources for both great scientific goals (LHC) and more futuristic publishing and peer review models (arXiv).
+We are building our own open scientific devices (iCub, OpenEphs, PulsePal) and adopting or inventing new languages (Python, R, Julia, Spark, caffe) to superscede the walled-garden (citation) of MATLAB.
+We are even taking cues from industry on how to lead large software engineering projects, through Github.
+And industry has entered into a race to the top in releasing exceptional tools for conducting research (Arduino, GitHub, AWS, Mechanical Turk, TensorFlow).
+With so much excitement around open research initiatives, it is natural that we look up to our colleagues in Physics or industry to continue borrowing from their tool kit. But we can not blindly take everything that we find there - or we would fall into Richard Feynman's famous 'cargo cult' indictment.
+
+Being careful in what you borrow is obviously good general advice. We wish to spend the rest of this article discussing something specific: the misguided suggestion of HDF5 as the standard container for open neuroscience datasets.
+HDF5 (github group link) is an object-oriented data format that has enjoyed wide adoption at NASA and in several fields of physics and meteorology.
+We argue that these are appropreate niches for HDF5, and that neuroscience is not.
+Relative to current wed data standards, the HDF5 format discourages distribution datasets across computers, impedes reuse and remixing of data in new applications, impedes version control, and imposes an unhelpful heirarchical shape on users' data.
+In the vast majority of use cases, web standard formats will be far less bug-prone, less accidentally hostile to shared-data apps, easier to produce and consume, more ammenable to version control, and more impedance-matched to the underlying data.
+
+# Do one thing, and do it well
+
+The UNIX philosophy is to build small tools with clean interfaces and good compositionality.
+This accords with the abstraction discipline from engineering.
+The components used to build a final solution are most useful if they have clearly defined inputs and limited scope.
+Tools with too many optional parameters, inputs coming from many different types of sources, and with dynamic reach, make for poor components in a compositional system.
+HDF5 was originally called "AEHOO" (All Encompassing Hierarchical Object Oriented format), as its goal was to systematize the storage of arbitrary forms of data, and also to allow the data to be sorted for different presentation. It presents an interface similar to to the standard POSIX interface for accessing files.
+The HDF5 format does serveral things, contrary to the dictum of doing one thing and doing it well.
+And each of the things that HDF5 does, is already done by a UNIX tool specialized for that particalar thing.
+The UNIX `tar` and `gzip` tools are specialized for combining multiple files into one for distribution. They are industry standards.
+All POSIX terminals present files accorting to the POSIX filepath stardard. `bash` is specilaized for navigating filesystems and presents a much richer system than the partial reimplementation available within HDF5.
+Sorting and aggregating according to data attributes are the special domain of database management systems, like the industry standard SQL platforms (e.g. PostgreSQL) and there non-relational counterparts (e.g. Riak, Redis).
+Often sorting and aggregation are analysis-specific operations, and are out of the scope of a data format. Scientific computing platforms and programming languages specialize in this form of data processing.
+And finally, for describing and storing actual units of data, we have specialized formats that suit the requirements of data sharing.
+We will describe these formats and the requiremets for data sharing later.
+
+# Version control
+
+One of the most promising stirrings within the culture of neuroscience is the movement toward an open experimental process, and away from the tradition of releasing a final report and expunging the history, nuance, and non-conforming data from the final publication. 
+Version control of research code is of course central to this process, and version-control of data and metadata are becoming more common as well.
+Version control systems allow a scientist to experiment with different code paths, without fear that one broad experimental change will invalidate the rest of the code or be difficult to undo. 
+Online version control systems like Github extend this workflow and make it simple to experimentally collaborate and manage the merger of changes from multiple people editing the same codebase. 
+Some open science initiatives are trying to bring these benefits to data itself (e.g. Dat-data.com). 
+A fundamental limitation to version control is that, to prevent ballooning in the size of the backed up files, different versions are tracked in terms of small 'patches' between the original data set and updates to entries or metadata.
+This works very well for textual data divided into multiple lines; it works very poorly for data in a binary format. 
+As HDF5 stores all data in a single binary blob, HDF5 files are effectively inappropriate for version control.
+Trying to version control an HDF5 file would result in a full copy of the entire dataset for each versioned change to the data.
+Alternative schemes in which binary data files are kept in a folder allow finer-grained version control.
+The most effecient scheme would replace the binary data with textual data.
+
+# Discoverability and remixing
+
+To the extent that the new wave of open science give us better tools producing faster streams of richer data, the great breakthrougs in scientific efficiency will come from discovering publicly available datasets and combining them rather that reflexively starting the data collection process from scratch.
+We have seen the rise of Data Science as a field of study with online courses guiding students through the collection and analysis of data in a number of open source programming languages and analysis environments. The data sources for these courses are generally a mix of JSON and the familiar comma-separated value ASCII format.
+ASCII formats are chosen for these courses because they are trivial to produce and consume in any language.
+They are intrinsically self-describing, unlike HDF5, in which the description is only accessible from within an HDF5 environment.
+Working with CSV and JSON data can be done in any text editor on any platform.
+JSON data is itself the native serialization format of JavaScript, and therefore receives maintenance attention from millions of web app developers.
+It is used by virtually all Web 2.0 applications to communicate data between servers and browser clients.
+In these contexts, communication may often happen between two different parties, or between servers and clients at different versions.
+A large amount of industry engineering has gone into tools for validating the well-formedness of any given JSON dataset with respect to the expected data schema.
+Larger datasets tend to be stored in industrial-strength relational database management systems. When the scale of a dataset grows to several gigabytes and the cost of storing it becomes problematic, storing the data in a SQL database or binary JSON document store is completely appropriate.
+
+# Tyrany of the Dominant Decomposition -or- Underflattening
+
+Object-oriented programming, and object-oriented storage schemas (JSON and HDF5 both fall into this category) follow the principal of decomposing a problem domain into a heirarchy of classes that we natural assign to real-world objects.
+Stores are composed of rooms, which may be composed of drawers, which are in turn filled with tools.
+
+```
+{ "Rooms": [{"Room":    "West Wing"
+            ,"Drawers": [{"Drawer": "Bin 6",
+                          "Tools": [ {"Name":"Saw",
+                                      "Electric": False
+                                     }
+                                   ]
+                         }]
+            },
+            {"Room":    "East Wing",
+             "Drawers": [{"Drawer": "Bin 2",
+                          "Tools":  [ {"Name": "Drill",
+                                       "Electric": False
+                                      }
+                                    ]
+                         }]
+            }, 
+            {"Room":    "North Wing",
+             "Drawers": [{"Drawer": "Bin 2",
+                          "Tools":  [ {"Name": "Iron",
+                                       "Electric": True
+                                      }
+                                    ]
+                         }]
+            }]
+}
+```
+
+A JSON document or HDF5 file organizes data in such a way that the user may drill down through the heirarchy to find the item of interest.
+On the surface this is quite useful, but it can become a drawback when there is more than one logical way to decompose the hierarchy.
+From the point of a view of a hardware vendor, it may be more useful to classify tools as hand-powered or electric, to divide the electric tools into functional categories (drilling, sawing, soldering), and further to divive them by price bracket.
+If our dataset is to be consumed by users with both perspectives, one of them will have to traverse a hierarchy that is completely irrelivant to their domain; and the metadata they do need will be divided among all of those irrelevant categories, violating the "Don't Repeat Yourself" principle.
+Comma-separated value formats, and JSON schemas that do not hierarchically organize data, but provide 'flat' metadata fields, allow the user to choose whichever classification scheme they like.
+
+```
+ Name,  Electric, Price Bracket,       Room, Drawer
+  Saw,     False,        Medium,  West Wing, Bin 6
+Drill,      True,     Expensive,  East Wing, Bin 2
+ Iron,      True,        Medium, North Wing, Bin 2
+```
+
+```
+[ {"Name":     "Saw",
+   "Electric": False,
+   "Price":    "Medium",
+   "Room":     "West Wing"
+   "Drawer":   "Bin 6"
+ },
+ {"Name":      "Drill",
+   "Electric": True,
+   "Price":    "Expensive",
+   "Room":     "East Wing"
+   "Drawer":   "Bin 2"
+ },
+ {"Name":      "Iron",
+  "Electric": True,
+  "Price":    "Expensive",
+  "Room":     "East Wing"
+  "Drawer":   "Bin 2"
+  }
+]
+```
+
+In the CSV and flattened JSON examples, there is no dominant decomposition.
+The decomposition is chosen by the user, or the user may want to consume data in a way that is simply non-hierarchical, by selecting on combitations on parameters from both decompositions at once.
+If the main use case of the data involves selecting small numbers of data points from out of a large collection, then a SQL database is an appropriate way to distribute data. SQL databases require some domain specific knowledge, but less than that required to navigate an HDF5 file, and they provide more flexible indexing.
+
+# The Magic Dimensions -or- Overflattening
+
+Consider 'magic numbers'.
+Most scientists who use computers to analyze their data recognize the danger of putting magic numbers directly into code:
+
+```
+licksPerHour = licks / 3600;
+voltage      = sample / (1024 * 0.000001 * gain)
+```
+
+Here are several problems that we encounter with this style:
+
+  - How do we know the numbers are right? 
+  - What happens if the programmer changes their code, and the `licks` variable changes its implicit units from `Hz` to `Events per minute`? 
+  - If we convert from `sample` to `voltage` many times in a code base, but realize that we performed the conversion wrong, how can we know that we have fixed the change everywhere?
+
+The solution is to avoid using 'magic numbers' in code, and to define named values in a single place, using units in variable names when they are not SI units:
+
+```
+SECS_PER_HOUR = 3600;
+SAMPLE_DOMAIN   = 1024;
+SAMPLE_CODOMAIN = 0.000001;
+SAMPLE_TO_VOLTS = gain * SAMPLE_CODOMAIN / SAMPLE_DOMAIN
+
+licksPerHour = licksPerSec * SECS_PER_HOUR;
+voltageMV    = sample * SAMPLE_TO_VOLTS;
+```
+
+
+One of the principal use cases of HDF5 is to store data in multi-dimensional arrays.
+Some data is inherrently multi-dimensional, such as images or volumetric simulations.
+But often data are put into an array prematurely, for example 10 sweeps of a voltage clamp protocol with 1000 samples per sweep would be placed into a 10 by 1000 array.
+There is an implicit pair of magic numbers here: The 1 position in an array lookup should be called `SWEEP_NUMBER` and the 2 position should be called `SAMPLE_NUMBER`, but it is extremely uncommon to refer to array dimension positions by name.
+Magic dimensions are just as error-prone as magic numbers, because a code change that alters the data format to lay out its voltage sweeps in columns instead of rows has no safe way of indicating that change to downstream users.
+There is no good convention for row layout.
+Arrays in the c language natively place elements in the same row into neighboring address spaces; Fortran has the opposite convention. MATLAB follows the c convention despite calling to Fortran for its matrix manipulation code.
+Even when data formats are guaranteed not to change, remembering magic dimension labels is difficult.
+
+```
+% Color the pixel at coordinate (x,y) white
+pixels(x/xSize, y/ySize) = 1;
+```
+
+Does this code have a bug in it?
+The answer is not obvious. 
+In C and MATLAB, this is a bug, because Cartesian coordinates are (x,y), but in the row-major format of c and MATLAB, the first coordinate chooses the row (y), and the second coordinate chooses the column (x). The code sample would have drawn a picture accidentally rotated 90 degrees (and flipped about the x axis).
+In Fortran this code would be correct, though perhaps only by a happy accident.
+
+Whenver data are not truly flat and have one dimension that is inherrently 'tighter' than the others (time samples within a voltage trace are 'tighter' than the same time sample across traces), a hierarchical format is more appropriate than the native-array format.
+
+```
+{ "timebase": [0, 0.01, 0.02 ... 0.20],
+  "traces":   [{"trace_number": 0,
+                "trace_v": [-1.2, -1.3, 1.1, 10.2, 15.2, ... , 12.0]
+               },
+               {"trace_number": 1,
+                "trace_v": [-1.3, -1.4, 1.1, 10.2, 15.2, ... , 12.4]
+               },
+               {"trace_number": 2,
+                "trace_v": [-1.2, -1.2, 1.1, 10.2, 14.2, ... , 12.1]
+               },
+              ]
+}
+```
+
+```
+Trace time, Trace 0, Trace 1, Trace 2
+      0.00,    -1.2,    -1.3,    -1.2
+      0.01,    -1.3,    -1.3,    -1.2
+      0.02,     1.1,    -1.3,    -1.2
+      0.03,    10.2,    -1.3,    -1.2
+      0.04,    15.2,    -1.3,    -1.2
+...
+      0.20,    12.0,    12.4,    12.1
+```
+
+The solutions in JSON and CSV admit no possibility of dimension misassignment, because the Tyrany of the Dominant Decomposition is used to enforece the only decomposition that makes sense.
+If one needs to forgo the safety of a non-flat data structure, for example to perform some vectorized array computation, then this operation should be done inside a functions whose inputs and outputs are both non-flat, so that implicit magic dimensions never escape the boundaries of the function's implementation.
+If flattening and unflattening the representation is slow in the user's language, then it may make sense to forgo the hierarchical representation for the entire lifetime of the data in the program, but this decision should certainly be completely local to the program in nearly all cases, and should be allowed to inflict bugs on users by residing in a flat data structure on the disk.
+
