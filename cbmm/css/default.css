@@ -1,0 +1,109 @@
+body {
+    font-size: 16px;
+}
+
+div#header {
+    //border-bottom: 2px solid black;
+    margin-bottom: 30px;
+    padding: 12px 0px 12px 0px;
+}
+
+div#logo a {
+    color: black;
+    float: left;
+    font-size: 18px;
+    font-weight: bold;
+    text-decoration: none;
+}
+
+div#header #navigation {
+    text-align: right;
+}
+
+div#header #navigation a {
+    color: black;
+    font-size: 18px;
+    font-weight: bold;
+    margin-left: 12px;
+    text-decoration: none;
+    text-transform: uppercase;
+}
+
+div#footer {
+    border-top: solid 2px hsla(208,54%,44%,1);
+    color: #555;
+    font-size: 12px;
+    margin-top: 30px;
+    padding: 12px 0px 12px 0px;
+    text-align: right;
+}
+
+h1 {
+    font-size: 24px;
+}
+
+h2 {
+    font-size: 20px;
+}
+
+div.info {
+    color: #555;
+    font-size: 14px;
+    font-style: italic;
+}
+
+.flex-container {
+    display: -webkit-box;
+    display: -moz-box;
+    display: -ms-box;
+    display: -webkit-flex;
+    display: flex;
+}
+
+.banner {
+    height: 150px;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    background: hsla(208,51.3%,86.3%,1);
+    border-width: 10px 0px 10px 0px;
+    border-style: solid;
+    border-color: hsla(208,51.3%,50%,1);
+}
+
+.banner-logo {
+}
+
+a.pure-menu-link.active {
+    background: hsla(208,51.3%, 86%,1);
+}
+
+.pure-menu-heading {
+    height:32px;
+    width: 32px;
+    display: flex;
+}
+
+.pure-menu-heading a, .pure-menu-heading span {
+    align-self: center;
+} 
+
+.pure-menu-heading img{
+    height:32px;
+    width: 32px;
+    filter: invert(100%);
+    -webkit-filter: invert(100%);
+}
+
+#menu span {
+    color: hsla(208,54%,50%,1);
+}
+
+a {
+    color: hsla(208,54%,44%,1);
+    text-decoration: none;
+}
+
+a:visited {
+    color: hsla(208,54%,44%,1);
+}
