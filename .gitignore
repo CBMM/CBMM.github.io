@@ -14,3 +14,4 @@ _cache
 cabal.sandbox.config
 dist
 _site
+site
