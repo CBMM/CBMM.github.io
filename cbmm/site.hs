@@ -23,7 +23,7 @@ main = hakyll $ do
         route   idRoute
         compile compressCssCompiler
 
-    match "about.rst" $ do
+    match "about.markdown" $ do
         route   $ setExtension "html"
         compile $ pandocCompiler
             >>= loadAndApplyTemplate "templates/default.html"
