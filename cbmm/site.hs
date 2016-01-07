@@ -30,13 +30,19 @@ main = hakyll $ do
                 (defaultContext `mappend` constField "page-about" "")
             >>= relativizeUrls
 
+    match "projects.markdown" $ do
+        route   $ setExtension "html"
+        compile $ pandocCompiler
+            >>= loadAndApplyTemplate "templates/default.html"
+                (defaultContext `mappend` constField "page-projects" "")
+            >>= relativizeUrls
+
     match "contact.markdown" $ do
         route   $ setExtension "html"
         compile $ pandocCompiler
             >>= loadAndApplyTemplate "templates/default.html"
                 (defaultContext `mappend` constField "page-contact" "")
             >>= relativizeUrls
-
 
     match "posts/*" $ do
         route $ setExtension "html"

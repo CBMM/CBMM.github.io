@@ -9,3 +9,7 @@ site/_site
 site/site.cabal.cabal
 *.hi
 *.o
+.DS_Store
+_cache
+cabal.sandbox.config
+dist
