@@ -1,0 +1,13 @@
+<ul>
+    $for(posts)$
+    <li class="post-item" >
+        <a href="$url$" >$title$</a>
+        <span class="info" >$date$ $if(author)$ by $author$ $endif$ </span>
+            $if(tags)$
+            <span class="info">
+                Tags: $tags$
+            </span>
+            $endif$
+    </li>
+    $endfor$
+</ul>

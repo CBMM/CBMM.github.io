@@ -1,7 +1,17 @@
 <ul>
     $for(posts)$
-        <li>
-            <a href="$url$">$title$</a> - $date$
+        <li class="post-item">
+            <a href="$url$">$title$</a>
+            <br/>
+            <span class="info">$date$ $if(author)$ by $author$ $endif$</span>
+            <p>
+                $if(teaser)$
+                    $teaser$
+                <a href="$url$" class="read-more">Read More &gt;&gt;=</a>
+                $else$
+                    $body$
+                $endif$
+            </p>
         </li>
     $endfor$
 </ul>

@@ -23,6 +23,22 @@ main = hakyll $ do
         route   idRoute
         compile compressCssCompiler
 
+    tags <- buildTags "posts/*" (fromCapture "tags/*.html")
+
+    tagsRules tags $ \tag pattern -> do
+      let title = "Posts tagged \"" ++ tag ++ "\""
+      route idRoute
+      compile $ do
+        posts <- recentFirst =<< loadAll pattern
+        let ctx = constField "title" title `mappend`
+                  listField "posts" (postCtx tags) (return posts) `mappend`
+                  defaultContext
+        makeItem ""
+          >>= loadAndApplyTemplate "templates/tag.html" ctx
+          >>= loadAndApplyTemplate "templates/default.html" ctx
+          >>= relativizeUrls
+
+
     match "about.markdown" $ do
         route   $ setExtension "html"
         compile $ pandocCompiler
@@ -47,16 +63,18 @@ main = hakyll $ do
     match "posts/*" $ do
         route $ setExtension "html"
         compile $ pandocCompiler
-            >>= loadAndApplyTemplate "templates/post.html"    postCtx
-            >>= loadAndApplyTemplate "templates/default.html" postCtx
+            >>= saveSnapshot "content"
+            >>= loadAndApplyTemplate "templates/post.html"    (postCtx tags)
+            >>= saveSnapshot "feedcontent"
+            >>= loadAndApplyTemplate "templates/default.html" (postCtx tags)
             >>= relativizeUrls
 
     create ["archive.html"] $ do
         route idRoute
         compile $ do
-            posts <- recentFirst =<< loadAll "posts/*"
+            posts <- recentFirst =<< loadAllSnapshots "posts/*" "content"
             let archiveCtx =
-                    listField "posts" postCtx (return posts) `mappend`
+                    listField "posts" (teaserCtx tags) (return posts) `mappend`
                     constField "page-archive" ""             `mappend`
                     constField "title" "Archives"            `mappend`
                     defaultContext
@@ -69,10 +87,10 @@ main = hakyll $ do
     match "index.html" $ do
         route idRoute
         compile $ do
-            posts <- recentFirst =<< loadAll "posts/*"
+            posts <- recentFirst =<< loadAllSnapshots "posts/*" "content"
             let indexCtx =
-                    listField "posts" postCtx (return posts) `mappend`
-                    constField "page-home" ""                `mappend`
+                    listField "posts" (teaserCtx tags) (return posts) `mappend`
+                    constField "page-home" ""                  `mappend`
                     defaultContext
 
             getResourceBody
@@ -82,10 +100,39 @@ main = hakyll $ do
 
     match "templates/*" $ compile templateCompiler
 
+    create ["atom.xml"] $ do
+      route idRoute
+      compile $ do
+        let feedCtx = postCtx tags `mappend` bodyField "description"
+        posts <- fmap (take 10) . recentFirst =<<
+          loadAllSnapshots "posts/*" "feedcontent"
+        renderAtom cbmmFeedConfig feedCtx posts
+
+    create ["rss.xml"] $ do
+      route idRoute
+      compile $ do
+        let feedCtx = postCtx tags `mappend` bodyField "description"
+        posts <- fmap (take 10) . recentFirst =<<
+          loadAllSnapshots "posts/*" "feedcontent"
+        renderRss cbmmFeedConfig feedCtx posts
+
+
 
 --------------------------------------------------------------------------------
-postCtx :: Context String
-postCtx =
+postCtx :: Tags -> Context String
+postCtx tags =
     dateField "date" "%B %e, %Y" `mappend`
+    tagsField "tags" tags `mappend`
     constField "page-blog" "" `mappend`
     defaultContext
+
+teaserCtx tags = teaserField "teaser" "content" `mappend` postCtx tags
+
+cbmmFeedConfig :: FeedConfiguration
+cbmmFeedConfig = FeedConfiguration
+  { feedTitle = "CBMM @ GitHub"
+  , feedDescription = "The open-source going ons of CBMM"
+  , feedAuthorName = "Greg Hale"
+  , feedAuthorEmail = "imalsogreg@gmail.com"
+  , feedRoot = "https://cbmm.github.io"
+  }
