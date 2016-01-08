@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>CBMM - Hakyll setup</title>
+        <link rel="stylesheet" type="text/css" href="http://yui.yahooapis.com/pure/0.6.0/pure-min.css">
+        <link rel="stylesheet" type="text/css" href="../css/default.css" />
+        <link rel="stylesheet" type="text/css" href="../css/layouts/side-menu.css" />
+    </head>
+
+    <body class="site">
+
+      <div id="layout">
+
+        <div id="nav">
+            
+<a href="#menu" id="menuLink" class="menu-link">
+    <!-- Hamburger icon -->
+    <span></span>
+</a>
+<div id="menu">
+    <div class="pure-menu menu">
+        <span class="pure-menu-heading">
+            <span>CBMM @</span>
+            <a href="https://github.com/CBMM">
+                <img src="../images/GitHub.png" /></a>
+        </span>
+        <ul class="pure-menu-list">
+            <li class="pure-menu-item">
+                <a href="../" class="pure-menu-link"> <span>Home</span></a>
+            </li>
+            <li class="pure-menu-item">
+                <a href="../about.html" class="pure-menu-link"><span>About</span></a>
+            </li>
+            <li class="pure-menu-item">
+                <a href="../projects.html" class="pure-menu-link"><span>Projects</span></a>
+            </li>
+            <li class="pure-menu-item">
+                <a href="../contact.html" class="pure-menu-link"><span>Contact</span></a>
+            </li>
+            <li class="pure-menu-item">
+                <a href="../archive.html" class="pure-menu-link"><span>Archive</span></a>
+            </li>
+        </ul>
+</div>
+</div>
+
+        </div>
+
+        <div id="header">
+          <div class="banner flex-container">
+              <img class="banner-logo" src="../images/bannerLogo.svg" />
+          </div>
+        </div>
+
+        <div id="content" class="content">
+
+            <h1>Hakyll setup</h1>
+
+            <div class="info">
+    Posted on January  7, 2016
+    
+        by Greg Hale
+    
+</div>
+<div class="info">
+    
+    Tags: <a href="../tags/blog.html">blog</a>, <a href="../tags/web.html">web</a>, <a href="../tags/hakyll.html">hakyll</a>, <a href="../tags/pandoc.html">pandoc</a>
+    
+</div>
+
+<p>Here is the first post on the CBMM @ Github website. As explained on the <a href="../about.html">About</a> page, we wanted a space to organize the open-source activity going on at the <a href="http://cbmm.mit.edu">CBMM</a>, beyond just the wall of repositories on our github <a href="https://github.com/CBMM">org page</a>.</p>
+<p>The design decisions reflect the broader universe of the CBMM software situation. The developer staff is small, and there are far more projects to do than people to do them. At the same time we want the site to be reliable to maintain and simple to edit with the same workflow that we use for developing software. We also want the development process to be totally <em>open</em>. So, <a href="https://pages.github.com/">GitHub pages</a> is an extremely good fit for hosting. We don’t have to do any maintenance or worry at all about backups. And the site content is generated mainly from <a href="http://commonmark.org/help/">markdown</a> via the fantastic document converter <a href="http://pandoc.org">pandoc</a> and static site generator <a href="http://jaspervdj.be/hakyll">Hakyll</a>.</p>
+<!--more-->
+<p>We will be exercising Pandoc and Hakyll more in the future, especially looking at whether they are a good fit for publication-like posts with references and figures. But for now, getting basic blog functionality, quick uploads, and very small page sizes, I’m happy with the tech choices.</p>
+<p>The rest of this post consists notes on design goals and things that needed tweaking for all the parts to fit together. If they help inform you in your own site set-up, then I’m happy.</p>
+<h2 id="load-time">Load time</h2>
+<p>Fast page loads are important<a href="#fn1" class="footnoteRef" id="fnref1"><sup>1</sup></a>, and high-res monitors are becoming more popular, so the big banner at the top is an SVG image drawn in <a href="https://inkscape.org/en/">inkscape</a> and weighing in at a delicate 24.1 kB (right-click, the choose <code>select</code> from the context menu, find the <code>Network</code> tab, and reload the page to get a listing of the assets and their sizes). I went with Yahoo’s <a href="http://purecss.io">Pure CSS</a> for a change, instead of the more typical <a href="http://getbootstrap.com">Twitter Bootstrap</a>. Together Pure’s files are less than 6 kB (compared to bootstap, which is closer to 30 kB). These are all <em>very</em> small numbers. But it was fun to get to try something different. Getting the responsive display hamburger menu working required copying some HTML from the <a href="http://purecss.io/layouts/side-menu/">side-menu</a> Pure layout example.</p>
+<h2 id="sticky-footerlongnote">Sticky Footer<a href="#fn2" class="footnoteRef" id="fnref2"><sup>2</sup></a></h2>
+<p>The <a href="https://philipwalton.github.io/solved-by-flexbox/demos/sticky-footer/">recommended trick</a> of using a flexbox to achieve a sticky footer<a href="#fn3" class="footnoteRef" id="fnref3"><sup>3</sup></a> didn’t work for me, probably because the responsive nav element has a strange shape that confuses the flexbox layout (or possibly just the <em>person</em> trying to use the flexbox layout).</p>
+<p>The workaround was to wrap all of the <code>body</code> content together in a <code>&lt;div class=&quot;layout&quot;&gt;</code> and make that layout div the <code>display: flex</code> container, rather that assigning that role directly to the <code>&lt;body&gt;</code>.</p>
+<h2 id="hamburger-space">Hamburger space</h2>
+<p>I prefer when the a sliding side menu covers the underlying content, rather than pushing the content over to make space. The latter is the default in PureCSS’s <code>side-menu</code> layout. Changing that was a matter of dropping the <code>left: 150px</code> in the <code>#layout.active</code> property of <code>side-menu.css</code>.</p>
+<h2 id="active-link">Active link</h2>
+<p>Although PureCSS offers some javascript to highlight the menu item corresponding to the page you’re looking at, I wanted to try to handle this statically in Hakyll, and I followed <a href="http://mesokurtosis.com/posts/2015-02-22-pages.html">Mesokurtosis’s</a> blog instructions to a T. Frankly I don’t have any intuition about how Hakyll’s templating system or compilers work (I should get on that!). Fortunately, one can clearly put a site together without understanding very much.</p>
+<h2 id="teasers-rss-and-tags">Teasers, RSS, and Tags</h2>
+<p>Here again, I have some homework to do to understand the Hakyll compilation process. I followed verbatim the <a href="https://github.com/jaspervdj/hakyll/blob/master/web/tutorials/using-teasers-in-hakyll.markdown">instructions</a> from Hakyll’s author, <a href="https://jaspervdj.be/">Jasper Van der Jeugt</a>, and another more hand-holding <a href="http://reichertbrothers.com/blog/posts/2014-04-08-hakyll-teasers.html">guide</a>.</p>
+<p>To set up the RSS feed I followed another of Jasper’s <a href="https://jaspervdj.be/hakyll/tutorials/05-snapshots-feeds.html">tutorial</a>s. And for post tags, I looked at his own blog’s <a href="https://github.com/jaspervdj/jaspervdj/blob/d0d76d0728f7827357b1ac8b9193f0630eda9019/src/Main.hs#L82-L97">repository</a> and another <a href="http://javran.github.io/posts/2014-03-01-add-tags-to-your-hakyll-blog.html">guide</a>. I’d be lying if I didn’t admit some shame for taking so many shortcuts! But please do have a look at the <a href="https://github.com/CBMM/CBMM.github.io">repository</a> and feel free to clone the whole thing if this is a reasonably starting-point for your own Hakyll blog.</p>
+<h2 id="deployment">Deployment</h2>
+<p>To manage the interaction with GitHub Pages, I keep all of the site’s sources on the <a href="https://github.com/CBMM/CBMM.github.io/tree/hakyll">hakyll branch</a>. When Hakyll compiles a site, it puts the whole thing into a directory called <code>_site</code> in the root of the project. By adding this repository’s <code>master</code> branch as a <a href="https://git-scm.com/docs/git-submodule">submodule</a> under the name <code>_site</code>, I’m able to deploy the site by simply <code>cd</code>ing into <code>_site</code>, committing all the files and pushing them to the master branch. This method I learned from a <a href="http://www.stackbuilders.com">Stack Builders</a> blog <a href="http://www.stackbuilders.com/news/dr-hakyll-create-a-github-page-with-hakyll-and-circleci">post</a>. The script to do the pushing is <a href="https://github.com/CBMM/CBMM.github.io/blob/hakyll/deploy.sh">here</a>.</p>
+<div class="footnotes">
+<hr />
+<ol>
+<li id="fn1"><p><a href="https://vimeo.com/147806338">The Web Obesity Crisis</a><a href="#fnref1">↩</a></p></li>
+<li id="fn2"><p>Sometimes it’s the easiest-seeming things that are hardest in programming and web design. ‘Sticky footer’ refers to the ability for the page’s footer to stick to the very bottom of the window, even if the window’s other content is short and doesn’t reach the bottom. It can be surprisingly hard to make this happen reliably. See the <a href="https://philipwalton.github.io/solved-by-flexbox/demos/sticky-footer/">flexbox solution</a> for a clearer demo of what I mean here. Relatedly, <a href="https://en.wikipedia.org/wiki/Holy_Grail_(web_design)">this</a> pattern is called the “Holy Grail” layout, because it’s often what the designer has in mind while being surprisingly tricky to implement.<a href="#fnref2">↩</a></p></li>
+<li id="fn3"><p><a href="https://philipwalton.github.io/solved-by-flexbox/demos/sticky-footer/" class="uri">https://philipwalton.github.io/solved-by-flexbox/demos/sticky-footer/</a><a href="#fnref3">↩</a></p></li>
+</ol>
+</div>
+
+        </div>
+
+        <div id="footer">
+            <span>Site proudly generated by
+                <a href="http://jaspervdj.be/hakyll">
+                    Hakyll</a>
+            </span>
+            <a href="http://www.nsf.gov" class="nsf-link">
+              <img src="../images/logo-nsf.png">
+            </a>
+        </div>
+
+      </div>
+      <script src="../js/ui.js">
+      </script>
+    </body>
+</html>
