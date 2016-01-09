@@ -2,15 +2,41 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"
     xmlns:dc="http://purl.org/dc/elements/1.1/">
     <channel>
-        <title>CBMM @ GitHub</title>
-        <link>https://cbmm.github.io</link>
-        <description><![CDATA[The open-source going ons of CBMM]]></description>
-        <atom:link href="https://cbmm.github.io/rss.xml" rel="self"
+        <title>TODO: Hakyll Base Feed</title>
+        <link>http://example.com</link>
+        <description><![CDATA[Replace me]]></description>
+        <atom:link href="http://example.com/rss.xml" rel="self"
                    type="application/rss+xml" />
-        <lastBuildDate>Thu, 07 Jan 2016 00:00:00 UT</lastBuildDate>
+        <lastBuildDate>Fri, 08 Jan 2016 00:00:00 UT</lastBuildDate>
         <item>
+    <title>Teaching Git & Github</title>
+    <link>http://example.com/posts/2016-01-08-iap-git-class.html</link>
+    <description><![CDATA[<div class="info">
+    Posted on January  8, 2016
+    
+        by Greg Hale
+    
+</div>
+<div class="info">
+    
+    Tags: <a href="/tags/git.html">git</a>, <a href="/tags/github.html">github</a>, <a href="/tags/teaching.html">teaching</a>
+    
+</div>
+
+<p>Today was the last of three one-day sessions on <a href="https://git-scm.com">git</a> and <a href="https://github.com">GitHub</a> (<a href="http://student.mit.edu/searchiap/iap-9289af8f51100344015126db3107020f.html">here</a> is the course description). Next week I’ll lead a one-week course called <a href="http://student.mit.edu/searchiap/iap-9289af8f51100344015126e75301021d.html">Opening up your research to the web</a>.</p>
+<p>We had 18 students in total, most coming for just a single 1.5 hour session. Students’ ages were anywhere from 17 to 60, with the elder ones tending to be there to listen. The average reason for attending was more or less: &gt; Our lab started using some software that’s hosted on github, and I’m confused about how to keep track of different versions.</p>
+<p>My goal in the class was to give students some muscle memory for working with git and GitHub. So I only lectured at the board for 5 minutes or so, then we immediately jumped in to exercises - namely cloning and contributing to a fake repository I set up at <a href="https://github.com/imalsogreg/gitdemo" class="uri">https://github.com/imalsogreg/gitdemo</a>.</p>
+<p>Students forked this repository to their own GitHub accounts (perhaps one still exists <a href="https://github.com/yunboyer/gitdemo">here</a>?), and each cloned the repository to their laptop, made a change, pushed their work back to github, and then issued pull requests to me. I integrated each pull request back into the original <code>gitdemo</code> repository in turn. Sometimes the merges were successful. Other times, one student’s work being integrated into the central repository would conflict with the merge of a later student’s work, so we got to see how merge conflicts are resolved.</p>
+<p>It takes a lot more than a couple of hours to get used to version control, learning the jargon, and grasping which aspects of git are mandatory and which are just parts of workflow convention. But I think the students all came away with a very solid grasp of the basics and how to move forward. All in all, for git I really like the interactive format.</p>
+<p>There are lots of online guides to git, particularly good ones are <a href="https://try.github.io/levels/1/challenges/1">try.github.io</a> and <a href="https://git-scm.com/doc">git-scm.com</a>.</p>
+]]></description>
+    <pubDate>Fri, 08 Jan 2016 00:00:00 UT</pubDate>
+    <guid>http://example.com/posts/2016-01-08-iap-git-class.html</guid>
+    <dc:creator>Replace me</dc:creator>
+</item>
+<item>
     <title>Hakyll setup</title>
-    <link>https://cbmm.github.io/posts/2016-01-07-hakyll-setup.html</link>
+    <link>http://example.com/posts/2016-01-07-hakyll-setup.html</link>
     <description><![CDATA[<div class="info">
     Posted on January  7, 2016
     
@@ -52,8 +78,8 @@
 </div>
 ]]></description>
     <pubDate>Thu, 07 Jan 2016 00:00:00 UT</pubDate>
-    <guid>https://cbmm.github.io/posts/2016-01-07-hakyll-setup.html</guid>
-    <dc:creator>Greg Hale</dc:creator>
+    <guid>http://example.com/posts/2016-01-07-hakyll-setup.html</guid>
+    <dc:creator>Replace me</dc:creator>
 </item>
 
     </channel>
