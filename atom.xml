@@ -42,6 +42,7 @@
 <li>Publishing negative results as a blog post</li>
 </ul>
 <h1 id="predictions">Predictions</h1>
+<!--more-->
 <p>Teaching the <a href="/posts/2016-01-08-iap-git-class.html">git introduction</a> showed me just how many micro-steps one has to take before feeling comfortable with basic coding and web technologies - it’s easy to forget that as you become comfortable yourself. In this class we might try to go way beyond just ‘get my project onto GitHub’. There’s some chance that either (a) there is no middle-ground where a researcher can learn enough about web tooling without sacrificing their research time, or (b) I won’t manage to lead the class to that middle-ground. That’s something to keep in mind as we start, and a good goal to keep coming back to.</p>
 ]]></summary>
 </entry>
@@ -65,6 +66,7 @@
 
 <p>Today was the last of three one-day sessions on <a href="https://git-scm.com">git</a> and <a href="https://github.com">GitHub</a> (<a href="http://student.mit.edu/searchiap/iap-9289af8f51100344015126db3107020f.html">here</a> is the course description). Next week I’ll lead a one-week course called <a href="http://student.mit.edu/searchiap/iap-9289af8f51100344015126e75301021d.html">Opening up your research to the web</a>.</p>
 <p>We had 18 students in total, most coming for just a single 1.5 hour session. Students’ ages were anywhere from 17 to 60, with the elder ones tending to be there to listen. The average reason for attending was more or less:</p>
+<!--more-->
 <blockquote>
 <p>Our lab started using some software that’s hosted on github, and I’m confused about how to keep track of different versions.</p>
 </blockquote>
