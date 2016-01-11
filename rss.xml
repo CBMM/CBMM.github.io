@@ -7,8 +7,44 @@
         <description><![CDATA[Replace me]]></description>
         <atom:link href="http://example.com/rss.xml" rel="self"
                    type="application/rss+xml" />
-        <lastBuildDate>Fri, 08 Jan 2016 00:00:00 UT</lastBuildDate>
+        <lastBuildDate>Mon, 11 Jan 2016 00:00:00 UT</lastBuildDate>
         <item>
+    <title>Opening up your research class - Day 0</title>
+    <link>http://example.com/posts/2016-01-11-opening-up-your-research-day-0.html</link>
+    <description><![CDATA[<div class="info">
+    Posted on January 11, 2016
+    
+        by Greg Hale
+    
+</div>
+<div class="info">
+    
+    Tags: <a href="/tags/teaching.html">teaching</a>, <a href="/tags/open%20science.html">open science</a>
+    
+</div>
+
+<h1 id="goals">Goals</h1>
+<ul>
+<li>Start collaborative relationships with at least a few students interested in giving their research an online presence.</li>
+<li>Give everyone enough confidence to continue learning and implement their own data/tool-sharing when they’re ready</li>
+</ul>
+<h1 id="ideas">Ideas</h1>
+<ul>
+<li>Datasets on S3 with descriptions on github-pages</li>
+<li>Contributing to reffit and reffit-like projects (peer review reform)</li>
+<li>Stand-alone servers running algorithm demos</li>
+<li>Programmatic figure generation, interactive graphics</li>
+<li>Helpful lab-widget webapps (calculators, timers, etc.)</li>
+<li>Publishing negative results as a blog post</li>
+</ul>
+<h1 id="predictions">Predictions</h1>
+<p>Teaching the <a href="/posts/2016-01-08-iap-git-class.html">git introduction</a> showed me just how many micro-steps one has to take before feeling comfortable with basic coding and web technologies - it’s easy to forget that as you become comfortable yourself. In this class we might try to go way beyond just ‘get my project onto GitHub’. There’s some chance that either (a) there is no middle-ground where a researcher can learn enough about web tooling without sacrificing their research time, or (b) I won’t manage to lead the class to that middle-ground. That’s something to keep in mind as we start, and a good goal to keep coming back to.</p>
+]]></description>
+    <pubDate>Mon, 11 Jan 2016 00:00:00 UT</pubDate>
+    <guid>http://example.com/posts/2016-01-11-opening-up-your-research-day-0.html</guid>
+    <dc:creator>Replace me</dc:creator>
+</item>
+<item>
     <title>Teaching Git & Github</title>
     <link>http://example.com/posts/2016-01-08-iap-git-class.html</link>
     <description><![CDATA[<div class="info">
