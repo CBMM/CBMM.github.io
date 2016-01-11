@@ -11,6 +11,8 @@ We had 18 students in total, most coming for just a single 1.5 hour session.
 Students' ages were anywhere from 17 to 60, with the elder ones tending to be there to listen.
 The average reason for attending was more or less:
 
+<!--more-->
+
 > Our lab started using some software that's hosted on github, and 
 I'm confused about how to keep track of different versions.
 

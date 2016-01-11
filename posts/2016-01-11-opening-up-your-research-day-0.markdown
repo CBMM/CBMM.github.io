@@ -20,6 +20,8 @@ tags: teaching, open science
 
 # Predictions
 
+<!--more-->
+
 Teaching the [git introduction](/posts/2016-01-08-iap-git-class.html) showed me just how many micro-steps one has to take before feeling comfortable with basic coding and web technologies - it's easy to forget that as you become comfortable yourself.
 In this class we might try to go way beyond just 'get my project onto GitHub'.
 There's some chance that either (a) there is no middle-ground where a researcher can learn enough about web tooling without sacrificing their research time, or (b) I won't manage to lead the class to that middle-ground.
