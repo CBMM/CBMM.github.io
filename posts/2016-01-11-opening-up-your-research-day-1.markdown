@@ -33,7 +33,8 @@ What did we do? Three things mainly:
  1. Personal introductions
  1. Round-table brainstorming on a project to tackle for the week
  1. Little demos of various online tools ([Hakyll](https://jaspervdj.be/hakyll/), [GitHub](http://github.com), [GitHub Pages](https://pages.github.com/), [markup.rocks](http://markup.rocks/), and the [Chrome DevTools](https://developer.chrome.com/devtools)
- 1. Set up an html/css/js [inches-to-cm converter(http://imalsogreg.github.io/inches/)
+ 1. Discussed when static sites are ok and when you need to turn to custom servers and AWS
+ 1. Set up an html/css/js inches-to-cm converter and hosted it on GitHub Pages
 
 That last point got 50% done with all students in attendance.
 But we did a lot of talking and didn't finish.
