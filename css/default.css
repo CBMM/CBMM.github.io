@@ -47,6 +47,7 @@ div#header #navigation a {
 .content {
     padding: 0 2em;
     max-width: 800px;
+    width: 80%;
     margin: 0 auto;
     line-height: 1.6em;
     -webkit-flex: 1;
