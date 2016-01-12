@@ -38,7 +38,8 @@
 <li>Personal introductions</li>
 <li>Round-table brainstorming on a project to tackle for the week</li>
 <li>Little demos of various online tools (<a href="https://jaspervdj.be/hakyll/">Hakyll</a>, <a href="http://github.com">GitHub</a>, <a href="https://pages.github.com/">GitHub Pages</a>, <a href="http://markup.rocks/">markup.rocks</a>, and the <a href="https://developer.chrome.com/devtools">Chrome DevTools</a></li>
-<li>Set up an html/css/js [inches-to-cm converter(http://imalsogreg.github.io/inches/)</li>
+<li>Discussed when static sites are ok and when you need to turn to custom servers and AWS</li>
+<li>Set up an html/css/js inches-to-cm converter and hosted it on GitHub Pages</li>
 </ol>
 <p>That last point got 50% done with all students in attendance. But we did a lot of talking and didn’t finish. So the last 50% was done with one student in the half-hour after class officially ended. This phase may have been my favorite, in fact, because I was free to make a lot of mistakes, and the student and I (I hope to memorize all their names next time) got to troubleshoot together. How does it work? Let me show you!</p>
 <p>We started by initializing a new git repository.</p>
