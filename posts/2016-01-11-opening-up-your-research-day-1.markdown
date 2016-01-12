@@ -17,6 +17,8 @@ Let's take a look at the goals I write down earlier today and see if we met them
 >  - Start collaborative relationships with at least a few students interested in giving their research an online presence.
 >  - Give everyone enough confidence to continue learning and implement their own data/tool-sharing when they're ready
 
+<!--more-->
+
 I probably was overly concerned here and set out easy goals to hit, because I think we did manage to hit these.
 We had nice chemistry as a group, people were comfortable to fit in and pipe up.
 I was really impressed by the students.
