@@ -2,15 +2,213 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"
     xmlns:dc="http://purl.org/dc/elements/1.1/">
     <channel>
-        <title>TODO: Hakyll Base Feed</title>
-        <link>http://example.com</link>
-        <description><![CDATA[Replace me]]></description>
-        <atom:link href="http://example.com/rss.xml" rel="self"
+        <title>CBMM @ GitHub</title>
+        <link>https://cbmm.github.io</link>
+        <description><![CDATA[The open-source going ons of CBMM]]></description>
+        <atom:link href="https://cbmm.github.io/rss.xml" rel="self"
                    type="application/rss+xml" />
-        <lastBuildDate>Mon, 11 Jan 2016 00:00:00 UT</lastBuildDate>
+        <lastBuildDate>Tue, 12 Jan 2016 00:00:00 UT</lastBuildDate>
         <item>
+    <title>Opening your research up to the web - Day 2</title>
+    <link>https://cbmm.github.io/posts/2016-01-12-opening-up-your-research-day-2.html</link>
+    <description><![CDATA[<div class="info">
+    Posted on January 12, 2016
+    
+        by Greg Hale
+    
+</div>
+<div class="info">
+    
+    Tags: <a href="/tags/open%20science.html">open science</a>, <a href="/tags/teaching.html">teaching</a>, <a href="/tags/snap.html">snap</a>, <a href="/tags/flask.html">flask</a>
+    
+</div>
+
+<p><a href="http://web.mit.edu/iap">IAP</a> can giveth, and IAP can taketh away. My bustling class of five has dropped by three and picked up one new student, then lost another. But hope is not lost. We may have a real project to work on. Our student from <a href="http://chemistry.mit.edu">chemistry</a> works on a very active Python codebase called the <a href="https://reactionmechanismgenerator.github.io">Reaction Mechanism Generator</a>.</p>
+<p>Useful as it is, installing the dependencies has apparently been hard enough to limit adoption, so we want to expose some of its functionality through a web interface. Just what I had in mind for our class! We’ll dedicate our three remaining sessions to this, hope that it benefits the Reaction Mechanism Generator project, and then see if the skills we learn spill over into other projects.</p>
+<h1 id="servers">Servers</h1>
+<p>On <a href="/posts/2016-01-11-opening-up-your-research-day-1.html">Day 1</a> we talked about static assets like <code>.html</code> files, <code>.css</code> files, <code>.js</code> scripts, and images. When the all we need to do is deliver these files to a user, we don’t have to handle writing any code to serve the files; we can just find a static hosting services like <a href="https://pages.github.com">GitHub Pages</a> or <a href="https://aws.amazon.com/s3">Amazon S3</a>.</p>
+<p>But that was a whole day ago, and today we want more. We need to be able to let the user specify a computation to run - like some set of reactants and environmental conditions - and we want to run the computation and return them a set of results. The files we’d want to serve back don’t exist yet - they are the output of the simulator, so our server needs to be a little more customized.</p>
+<p>Fortunately for us, writing backend code is fun. We get to choose any language we like as long as it has a library for serving HTTP traffic. And we get to learn a little bit about <a href="http://www.tutorialspoint.com/http/http_requests">HTTP</a> and <a href="https://en.wikipedia.org/wiki/Query_string">URLs</a>.</p>
+<h1 id="warm-up">Warm-up</h1>
+<p>We’ll start with a miniaturized version of our final project goal. For some small set of programs already available on our computer, let’s write a server that calls those programs, passes them some data, and returns their result. For example, <code>cowsay</code> and <code>doubleit</code>.</p>
+<p>To get <code>cowsay</code>,</p>
+<pre><code># on osx
+brew install cowsay
+# or ubuntu
+sudo apt-get install cowsay</code></pre>
+<p>The program <code>cowsay</code> takes a string argument and returns an ASCII picture of a cow saying whatever you wrote in the string. For example:</p>
+<pre><code>&gt; cowsay This is a cowsay test
+
+ _______________________
+&lt; This is a cowsay test &gt;
+ -----------------------
+        \   ^__^
+         \  (oo)\_______
+            (__)\       )\/\
+                ||----w |
+                ||     ||
+</code></pre>
+<p>Very nice.</p>
+<p>The program <code>doubleit</code> takes a single number and returns than number multiplied by two - it does not exist yet, so let’s just write it in Python, in a file at <code>/usr/local/bin/doubleit</code></p>
+<div class="sourceCode"><pre class="sourceCode python"><code class="sourceCode python"><span class="op">!</span><span class="co">#/usr/bin/env python</span>
+
+<span class="im">import</span> sys
+
+<span class="cf">if</span> <span class="va">__name__</span> <span class="op">==</span> <span class="st">&#39;__main__&#39;</span>:
+    i <span class="op">=</span> sys.argv[<span class="dv">1</span>]
+    <span class="bu">print</span>(<span class="dv">2</span><span class="op">*</span><span class="bu">float</span>(i))</code></pre></div>
+<p>Any program printing twice its input will work, so I won’t spend time explaining this. But of course feel free to google around and pick apart any of the code examples in this series.</p>
+<p>By this point, our machine is set up with a couple programs we want to expose - our standins for <code>runReactionSimulation</code>. We can turn our attention to the HTTP server.</p>
+<p>A server is basically just a function from HTTP Requests to HTTP Responses. The request will be delivered to your server by the internet, usually coming from a web browser. It is a block of ASCII text not unlike our cowsay picture, except that the text contains a URL, some metadata, a ‘verb’ (<code>GET</code>, <code>POST</code>, <code>PUT</code>, <code>DELETE</code>, or a hand full of others), and perhaps some auxiliary data. The server we write will parse that request and deliver the pieces to you. You will use them to determine what the user wanted, then build up a response - another block of text - to send back to the browser.</p>
+<p>We wand our users to be able to ask for numbers to be doubled, or to have phrases cow-said, and we will ask them to use the URL bar for this. To get twice the number <code>20</code>, we ask them to visit</p>
+<pre><code>http://example.com/doubleit/20</code></pre>
+<p>For a cow saying <code>anything_at_all</code>:</p>
+<pre><code>http://example.com/cowsay/anything_at_all</code></pre>
+<p>We also want the user to see our static assets (<code>index.html</code> et. al.) when they visit <code>http://example.com/</code>.</p>
+<p>The specification so far probably seems simple enough, but writing that software to handle the traffic may be more daunting. Getting it up and running actually isn’t as hard as you might imagine. Maintaining it and keeping the bugs out is probably harder than you expect.</p>
+<p>Let’s just look at some code. The following example is a complete working web server that implements our spec.</p>
+<div class="sourceCode"><table class="sourceCode haskell numberLines"><tr class="sourceCode"><td class="lineNumbers"><pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+</pre></td><td class="sourceCode"><pre><code class="sourceCode haskell"><span class="ot">{-# LANGUAGE OverloadedStrings #-}</span>
+
+<span class="kw">import </span><span class="dt">Control.Monad.IO.Class</span> (liftIO)
+<span class="kw">import </span><span class="dt">Data.ByteString.Char8</span>  (append, pack, unpack)
+<span class="kw">import </span><span class="dt">Data.Maybe</span>             (maybeToList)
+<span class="kw">import </span><span class="dt">Snap</span>                   (getParam, ifTop, route, writeBS)
+<span class="kw">import </span><span class="dt">Snap.Http.Server</span>       (commandLineConfig, quickHttpServe)
+<span class="kw">import </span><span class="dt">Snap.Util.FileServe</span>    (serveFile)
+<span class="kw">import </span><span class="dt">System.Process</span>         (readProcess)
+
+<span class="fu">------------------------------------------------------------------------------</span>
+<span class="co">-- | List of shell commands we&#39;ll make available to the server</span>
+cmds <span class="fu">=</span> [<span class="st">&quot;doubleit&quot;</span>, <span class="st">&quot;cowsay&quot;</span>]
+
+<span class="fu">------------------------------------------------------------------------------</span>
+<span class="co">-- | A list of pairs: (Query striing to pattern-match from the URL, Handler)</span>
+routes <span class="fu">=</span> [ (<span class="st">&quot;/:cmd/:arg&quot;</span>, serveCommand cmds             ),
+           (<span class="st">&quot;&quot;</span>,           ifTop (serveFile <span class="st">&quot;index.html&quot;</span>))
+         ]
+
+<span class="fu">------------------------------------------------------------------------------</span>
+<span class="co">-- | Main function chooses between serving static assets</span>
+<span class="co">--   and handling command requests</span>
+main <span class="fu">=</span> quickHttpServe (route routes)
+
+<span class="fu">------------------------------------------------------------------------------</span>
+<span class="co">-- | Handler to extract the command name and argument string</span>
+<span class="co">--   from the request, run it, and respond with the command&#39;s output</span>
+serveCommand okCmds <span class="fu">=</span> <span class="kw">do</span>
+  cmd <span class="ot">&lt;-</span> getParam <span class="st">&quot;cmd&quot;</span>
+  arg <span class="ot">&lt;-</span> maybeToList <span class="fu">&lt;$&gt;</span> getParam <span class="st">&quot;arg&quot;</span>
+  <span class="kw">case</span> cmd <span class="kw">of</span>
+    <span class="dt">Nothing</span> <span class="ot">-&gt;</span> writeBS <span class="st">&quot;No command&quot;</span>
+    <span class="dt">Just</span> c
+      <span class="fu">|</span> c <span class="ot">`notElem`</span> okCmds <span class="ot">-&gt;</span>
+        writeBS (append c <span class="st">&quot; is not an ok command&quot;</span>)
+      <span class="fu">|</span> otherwise <span class="ot">-&gt;</span> <span class="kw">do</span>
+          retString <span class="ot">&lt;-</span> liftIO (readProcess (unpack c) (map unpack arg) <span class="st">&quot;&quot;</span>)
+          writeBS (pack retString)</code></pre></td></tr></table></div>
+<p>This is probably more intimidating than the other code examples we’ve seen, and some of the conventions are different from what we may be used to. But we still haven’t broken past 40 lines of code.</p>
+<p>The first 10 lines are just listing the functions we’re importing from the <a href="http://haskell.org">Haskell</a> web framework <a href="http://snapframework.com">Snap</a>. Lines 13 and 17 are values we’re creating for later use - a list of strings corresponding to the commands on our computer we’ll access, and then a list of <code>routes</code>.</p>
+<p>Each <code>route</code> is a pair of a URL pattern and a handler function to execute if the pattern matches. The <code>route</code> <code>&quot;/:cmd/:arg&quot;</code> will match any URL with the shape <code>http://example.com/something/another</code> - and we pair that pattern with <code>serveCommand cmds</code>, a function we write on lines 29-39. The next route only matches <code>http://example.com/</code>. That request will get routed to a function we imported from <code>Snap</code> for fetching files from the hard drive and sending them back to our client. <code>Snap</code> provides similar functions for allowing access to entire directories - you would do that if your site had more static assets than just a single <code>index.html</code> file.</p>
+<p>The implementation of <code>serveCommand</code> pulls out the part of the URL matching our <code>:cmd</code> in the route pattern and the part matching <code>:arg</code>. We test whether the <code>:cmd</code> part was empty (handling that case on line 33), and if not empty, we check to see that it is in the list of valid commands (line 35). On line 38, we finally pass the command and argument parts to the function <a href="https://hackage.haskell.org/package/process-1.4.1.0/docs/System-Process.html#v:readProcess">readProcess</a>, which calls out to the shell environment to execute whatever command and argument were extracted from the URL<a href="#fn1" class="footnoteRef" id="fnref1"><sup>1</sup></a>.</p>
+<p>We can achieve the same thing with a <a href="https://www.python.org">Python</a> script using the <a href="http://flask.pocoo.org/">Flask</a> framework.</p>
+<div class="sourceCode"><table class="sourceCode python numberLines"><tr class="sourceCode"><td class="lineNumbers"><pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+</pre></td><td class="sourceCode"><pre><code class="sourceCode python"><span class="im">from</span> flask <span class="im">import</span> Flask
+<span class="im">import</span> os
+<span class="im">import</span> subprocess
+app <span class="op">=</span> Flask(<span class="va">__name__</span>)
+
+okCmds <span class="op">=</span> <span class="bu">frozenset</span>([<span class="st">&quot;cowsay&quot;</span>,<span class="st">&quot;doubleit&quot;</span>])
+
+<span class="at">@app.route</span>(<span class="st">&#39;/&lt;cmd&gt;/&lt;arg&gt;&#39;</span>)
+<span class="kw">def</span> runCmd(cmd,arg):
+    <span class="cf">if</span> cmd <span class="op">in</span> okCmds:
+        o <span class="op">=</span> subprocess.check_output([cmd,arg])
+        <span class="cf">return</span> (<span class="st">&#39;&lt;pre&gt;&#39;</span> <span class="op">+</span> o <span class="op">+</span> <span class="st">&#39;&lt;/pre&gt;&#39;</span>)
+    <span class="cf">else</span>:
+        <span class="cf">return</span> ( cmd <span class="op">+</span> <span class="st">&#39; is not an ok command.&#39;</span> )
+
+<span class="at">@app.route</span>(<span class="st">&#39;/&#39;</span>)
+<span class="kw">def</span> index():
+  <span class="cf">return</span> <span class="st">&quot;Hi&quot;</span>
+
+<span class="cf">if</span> <span class="va">__name__</span> <span class="op">==</span> <span class="st">&quot;__main__&quot;</span>:
+    app.run(host<span class="op">=</span><span class="st">&quot;0.0.0.0&quot;</span>, port<span class="op">=</span><span class="dv">8000</span>)</code></pre></td></tr></table></div>
+<p>Flask provides a similar set of tools for taking a request, breaking it into parts, matching on the URL, and returning a response. This code has the advantage that we can run it in Python without needing to run a compiler. That can make it easier to get started and to experiment. The disadvantage is that there is no compiler to check the code; and Python’s increased flexibility means that it’s easier to stretch into postures that are bugs. Writing the above Python server was fun, but nearly every line contained a bug that I didn’t catch until running the program. When programs get bigger (as our server will when we graduate from <code>cowsay</code> to ReactionMechanismGenerator, we will see just how many places for bugs to shelter and enjoy the warmth emanating from our server machine).</p>
+<p>We run the server code the same way we run any program. In the compiled Haskell case[^1], we run our generated executable <code>shell-base-server</code>, optionally passing the aragument <code>-p 80</code>. This argument specifies the port for the server to connect to. When debugging, we often default to port 8000. Port 80 will expose your program to the public internet. You will have to start the program as <code>sudo</code> to access port 80. To run the Python server, pass the code to the Python interpreter: <code>python server.py</code>; the port selection in this case is made in the script.</p>
+<p>Next time, we will talk about picking a server for the specific needs of a given project, and get to work building it out to those specs.</p>
+<div class="footnotes">
+<hr />
+<ol>
+<li id="fn1"><p>The instances of <a href="http://hackage.haskell.org/package/bytestring-0.9.2.1/docs/Data-ByteString.html#v:pack">pack</a> and <a href="http://hackage.haskell.org/package/bytestring-0.9.2.1/docs/Data-ByteString.html#v:unpack">unpack</a> are transforming between different representations of text strings available in <code>Haskell</code>. <a href="https://hackage.haskell.org/package/transformers-0.4.2.0/docs/Control-Monad-IO-Class.html#v:liftIO">liftIO</a> allows arbitrary IO actions to be embedded into the <code>Snap</code> monad. Making sense of these things requires studying <a href="http://haskell.org">Haskell</a> the language and the <a href="http://snapframework.com">Snap Framework</a>, which each have great online documentation and communities.<a href="#fnref1">↩</a></p></li>
+</ol>
+</div>
+]]></description>
+    <pubDate>Tue, 12 Jan 2016 00:00:00 UT</pubDate>
+    <guid>https://cbmm.github.io/posts/2016-01-12-opening-up-your-research-day-2.html</guid>
+    <dc:creator>Greg Hale</dc:creator>
+</item>
+<item>
     <title>Opening your research up to the web - Day 1</title>
-    <link>http://example.com/posts/2016-01-11-opening-up-your-research-day-1.html</link>
+    <link>https://cbmm.github.io/posts/2016-01-11-opening-up-your-research-day-1.html</link>
     <description><![CDATA[<div class="info">
     Posted on January 11, 2016
     
@@ -153,12 +351,12 @@ git push origin gh-pages</code></pre>
 <p>I’m really looking forward to diving in and picking something concrete to work on in the next class!</p>
 ]]></description>
     <pubDate>Mon, 11 Jan 2016 00:00:00 UT</pubDate>
-    <guid>http://example.com/posts/2016-01-11-opening-up-your-research-day-1.html</guid>
-    <dc:creator>Replace me</dc:creator>
+    <guid>https://cbmm.github.io/posts/2016-01-11-opening-up-your-research-day-1.html</guid>
+    <dc:creator>Greg Hale</dc:creator>
 </item>
 <item>
     <title>Opening up your research class - Day 0</title>
-    <link>http://example.com/posts/2016-01-11-opening-up-your-research-day-0.html</link>
+    <link>https://cbmm.github.io/posts/2016-01-11-opening-up-your-research-day-0.html</link>
     <description><![CDATA[<div class="info">
     Posted on January 11, 2016
     
@@ -190,12 +388,12 @@ git push origin gh-pages</code></pre>
 <p>Teaching the <a href="/posts/2016-01-08-iap-git-class.html">git introduction</a> showed me just how many micro-steps one has to take before feeling comfortable with basic coding and web technologies - it’s easy to forget that as you become comfortable yourself. In this class we might try to go way beyond just ‘get my project onto GitHub’. There’s some chance that either (a) there is no middle-ground where a researcher can learn enough about web tooling without sacrificing their research time, or (b) I won’t manage to lead the class to that middle-ground. That’s something to keep in mind as we start, and a good goal to keep coming back to.</p>
 ]]></description>
     <pubDate>Mon, 11 Jan 2016 00:00:00 UT</pubDate>
-    <guid>http://example.com/posts/2016-01-11-opening-up-your-research-day-0.html</guid>
-    <dc:creator>Replace me</dc:creator>
+    <guid>https://cbmm.github.io/posts/2016-01-11-opening-up-your-research-day-0.html</guid>
+    <dc:creator>Greg Hale</dc:creator>
 </item>
 <item>
     <title>Teaching Git & Github</title>
-    <link>http://example.com/posts/2016-01-08-iap-git-class.html</link>
+    <link>https://cbmm.github.io/posts/2016-01-08-iap-git-class.html</link>
     <description><![CDATA[<div class="info">
     Posted on January  8, 2016
     
@@ -220,12 +418,12 @@ git push origin gh-pages</code></pre>
 <p>There are lots of online guides to git, particularly good ones are <a href="https://try.github.io/levels/1/challenges/1">try.github.io</a> and <a href="https://git-scm.com/doc">git-scm.com</a>.</p>
 ]]></description>
     <pubDate>Fri, 08 Jan 2016 00:00:00 UT</pubDate>
-    <guid>http://example.com/posts/2016-01-08-iap-git-class.html</guid>
-    <dc:creator>Replace me</dc:creator>
+    <guid>https://cbmm.github.io/posts/2016-01-08-iap-git-class.html</guid>
+    <dc:creator>Greg Hale</dc:creator>
 </item>
 <item>
     <title>Hakyll setup</title>
-    <link>http://example.com/posts/2016-01-07-hakyll-setup.html</link>
+    <link>https://cbmm.github.io/posts/2016-01-07-hakyll-setup.html</link>
     <description><![CDATA[<div class="info">
     Posted on January  7, 2016
     
@@ -267,8 +465,8 @@ git push origin gh-pages</code></pre>
 </div>
 ]]></description>
     <pubDate>Thu, 07 Jan 2016 00:00:00 UT</pubDate>
-    <guid>http://example.com/posts/2016-01-07-hakyll-setup.html</guid>
-    <dc:creator>Replace me</dc:creator>
+    <guid>https://cbmm.github.io/posts/2016-01-07-hakyll-setup.html</guid>
+    <dc:creator>Greg Hale</dc:creator>
 </item>
 
     </channel>
