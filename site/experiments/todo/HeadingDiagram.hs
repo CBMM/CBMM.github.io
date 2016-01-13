@@ -10,6 +10,7 @@ import Data.Monoid
 import qualified Data.Text as T
 import Data.Time
 import Data.Time.Clock
+import Lucid (p_)
 import Lucid.Svg hiding (translate)
 import Data.OrgMode.Parse.Types
 
@@ -17,17 +18,22 @@ import Axis
 import Shadow
 
 hBoxHeight :: Int
-hBoxHeight = 70
+hBoxHeight = 100
 hBoxSep :: Int
-hBoxSep    = 10
+hBoxSep    = 20
 
 headingBackColor h = case priority h of
-  Just A  -> P.d3Colors2 P.Dark 3
-  Just B  -> P.d3Colors2 P.Dark 6
-  Just C  -> P.d3Colors2 P.Dark 1
-  Nothing -> P.d3Colors2 P.Dark 2
+  Just A  -> P.d3Colors4 P.Dark 3
+  Just B  -> P.d3Colors4 P.Dark 6
+  Just C  -> P.d3Colors4 P.Dark 1
+  Nothing -> P.d3Colors4 P.Dark 2
 
-trimColor h = C.darken 0.5 (headingBackColor h)
+trimColor h = case priority h of
+  Just A  -> P.d3Colors4 P.Light 3
+  Just B  -> P.d3Colors4 P.Light 6
+  Just C  -> P.d3Colors4 P.Light 1
+  Nothing -> P.d3Colors4 P.Light 2
+
 
 clockBoxColor = C.withOpacity C.white 0.2
 
@@ -40,7 +46,12 @@ headingDiagram axis i h =
   with g_ (gTranslate 0 (hBoxSep + (succ i)*(hBoxHeight+hBoxSep))) $ do
     dropShadow 6 6 2 (headingBackRect axis h)
     mconcat clockDiagrams
-    text_ [x_ "50", y_ "50"] "Test text" -- (title h)
+--    let a = do
+--          "A test "
+--          a_ [href_ "http://www.google.com"] (toHtml $ title h)
+--          " works?"
+        -- a = t :: Int
+    text_ [x_ "50", y_ "50", dominant_baseline_ "middle"] (toHtml $ title h)
     headingBackTrim axis h
       where clockDiagrams :: [Svg ()]
             clockDiagrams = map (clockBlock axis h)
@@ -67,8 +78,8 @@ headingBackTrim axis h =
   in do
      with oneLine [ y1_ "10"
                   , y2_ "10"]
-     with oneLine [ y1_ (showT ((hBoxHeight `div` 2) - 10))
-                  , y2_ (showT ((hBoxHeight `div` 2) - 10))]
+     with oneLine [ y1_ (showT (hBoxHeight - 10))
+                  , y2_ (showT (hBoxHeight - 10))]
 
 
 clockBlock :: XAxisConfig -> Heading -> Timestamp -> MySvg

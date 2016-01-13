@@ -26,6 +26,9 @@ executable todo
                        diagrams-lib,
                        diagrams-svg,
                        errors,
+                       ghcjs-dom,
+                       jsaddle,
+                       lucid,
                        lucid-svg,
                        orgmode-parse,
                        palette,
@@ -36,3 +39,4 @@ executable todo
                        transformers,
                        unordered-containers
   default-language:    Haskell2010
+  hidden-modules:      Axis, Github, HeadingDiagram

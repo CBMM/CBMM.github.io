@@ -2,10 +2,13 @@
 {-# LANGUAGE RecursiveDo       #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards   #-}
+{-# Language RankNTypes #-}
 
 module Main where
 
+import Control.Concurrent (threadDelay)
 import Control.Error (note)
+import           Control.Monad (liftM)
 import           Control.Monad.IO.Class (liftIO)
 import qualified Data.Attoparsec.Text as T
 import qualified Data.Aeson           as A
@@ -20,6 +23,11 @@ import qualified Data.Text            as T
 import           Data.Time
 import           Data.Time.Calendar.WeekDate
 import           Data.Time.Clock
+import           GHCJS.DOM
+import qualified GHCJS.DOM.Document as Dom
+import qualified GHCJS.DOM.Element  as Dom
+import           GHCJS.DOM.HTMLDocument as Dom
+import           GHCJS.DOM.HTMLElement as Dom
 import           Reflex.Dom
 import qualified Data.Text.Lazy       as TL
 import           Lucid.Svg            hiding ((<>))
@@ -29,6 +37,7 @@ import           Data.OrgMode.Parse.Types
 
 import Axis
 import HeadingDiagram
+import Github
 
 --showT :: Show a => a -> T.Text
 --showT = T.pack . show
@@ -44,7 +53,16 @@ myOrgUrl = "file:///home/greghale/Programming/CBMM.github.io/site/experiments/to
 #endif
 
 main :: IO ()
-main = mainWidget $ mdo
+main = runWebGUI $ \webView -> do
+  doc <- waitUntilJust $ liftM (fmap Dom.castToHTMLDocument) $
+         webViewGetDomDocument webView
+  let btag = "reflex-area" :: String
+  root <- waitUntilJust $ liftM (fmap Dom.castToHTMLElement) $
+          Dom.documentGetElementById doc btag
+  attachWidget root webView runReflex
+
+runReflex :: forall t m. MonadWidget t m => m ()
+runReflex = mdo
 
   Reflex.Dom.text (myOrgUrl)
   --diagramWidget "head circle" (circle 100)
@@ -197,3 +215,14 @@ timeLegend xConf@XAxisConfig{..} = legendDia
       legendDia = g_ $ do
         baseLine
         mconcat (map tickDia (yearLabels ++ monthLabels ++ wkDayLabels))
+
+------------------------------------------------------------------------------
+waitUntilJust :: IO (Maybe a) -> IO a
+waitUntilJust a = do
+    mx <- a
+    case mx of
+      Just x -> return x
+      Nothing -> do
+        threadDelay 10000
+        waitUntilJust a
+
