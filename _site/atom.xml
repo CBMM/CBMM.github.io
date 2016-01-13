@@ -1,0 +1,473 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+    <title>CBMM @ GitHub</title>
+    <link href="https://cbmm.github.io/atom.xml" rel="self" />
+    <link href="https://cbmm.github.io" />
+    <id>https://cbmm.github.io/atom.xml</id>
+    <author>
+        <name>Greg Hale</name>
+        <email>imalsogreg@gmail.com</email>
+    </author>
+    <updated>2016-01-12T00:00:00Z</updated>
+    <entry>
+    <title>Opening your research up to the web - Day 2</title>
+    <link href="https://cbmm.github.io/posts/2016-01-12-opening-up-your-research-day-2.html" />
+    <id>https://cbmm.github.io/posts/2016-01-12-opening-up-your-research-day-2.html</id>
+    <published>2016-01-12T00:00:00Z</published>
+    <updated>2016-01-12T00:00:00Z</updated>
+    <summary type="html"><![CDATA[<div class="info">
+    Posted on January 12, 2016
+    
+        by Greg Hale
+    
+</div>
+<div class="info">
+    
+    Tags: <a href="/tags/open%20science.html">open science</a>, <a href="/tags/teaching.html">teaching</a>, <a href="/tags/snap.html">snap</a>, <a href="/tags/flask.html">flask</a>
+    
+</div>
+
+<p><a href="http://web.mit.edu/iap">IAP</a> can giveth, and IAP can taketh away. My bustling class of five has dropped by three and picked up one new student, then lost another. But hope is not lost. We may have a real project to work on. Our student from <a href="http://chemistry.mit.edu">chemistry</a> works on a very active Python codebase called the <a href="https://reactionmechanismgenerator.github.io">Reaction Mechanism Generator</a>.</p>
+<p>Useful as it is, installing the dependencies has apparently been hard enough to limit adoption, so we want to expose some of its functionality through a web interface. Just what I had in mind for our class! We’ll dedicate our three remaining sessions to this, hope that it benefits the Reaction Mechanism Generator project, and then see if the skills we learn spill over into other projects.</p>
+<h1 id="servers">Servers</h1>
+<p>On <a href="/posts/2016-01-11-opening-up-your-research-day-1.html">Day 1</a> we talked about static assets like <code>.html</code> files, <code>.css</code> files, <code>.js</code> scripts, and images. When the all we need to do is deliver these files to a user, we don’t have to handle writing any code to serve the files; we can just find a static hosting services like <a href="https://pages.github.com">GitHub Pages</a> or <a href="https://aws.amazon.com/s3">Amazon S3</a>.</p>
+<p>But that was a whole day ago, and today we want more. We need to be able to let the user specify a computation to run - like some set of reactants and environmental conditions - and we want to run the computation and return them a set of results. The files we’d want to serve back don’t exist yet - they are the output of the simulator, so our server needs to be a little more customized.</p>
+<p>Fortunately for us, writing backend code is fun. We get to choose any language we like as long as it has a library for serving HTTP traffic. And we get to learn a little bit about <a href="http://www.tutorialspoint.com/http/http_requests">HTTP</a> and <a href="https://en.wikipedia.org/wiki/Query_string">URLs</a>.</p>
+<h1 id="warm-up">Warm-up</h1>
+<p>We’ll start with a miniaturized version of our final project goal. For some small set of programs already available on our computer, let’s write a server that calls those programs, passes them some data, and returns their result. For example, <code>cowsay</code> and <code>doubleit</code>.</p>
+<p>To get <code>cowsay</code>,</p>
+<pre><code># on osx
+brew install cowsay
+# or ubuntu
+sudo apt-get install cowsay</code></pre>
+<p>The program <code>cowsay</code> takes a string argument and returns an ASCII picture of a cow saying whatever you wrote in the string. For example:</p>
+<pre><code>&gt; cowsay This is a cowsay test
+
+ _______________________
+&lt; This is a cowsay test &gt;
+ -----------------------
+        \   ^__^
+         \  (oo)\_______
+            (__)\       )\/\
+                ||----w |
+                ||     ||
+</code></pre>
+<p>Very nice.</p>
+<p>The program <code>doubleit</code> takes a single number and returns than number multiplied by two - it does not exist yet, so let’s just write it in Python, in a file at <code>/usr/local/bin/doubleit</code></p>
+<div class="sourceCode"><pre class="sourceCode python"><code class="sourceCode python"><span class="op">!</span><span class="co">#/usr/bin/env python</span>
+
+<span class="im">import</span> sys
+
+<span class="cf">if</span> <span class="va">__name__</span> <span class="op">==</span> <span class="st">&#39;__main__&#39;</span>:
+    i <span class="op">=</span> sys.argv[<span class="dv">1</span>]
+    <span class="bu">print</span>(<span class="dv">2</span><span class="op">*</span><span class="bu">float</span>(i))</code></pre></div>
+<p>Any program printing twice its input will work, so I won’t spend time explaining this. But of course feel free to google around and pick apart any of the code examples in this series.</p>
+<p>By this point, our machine is set up with a couple programs we want to expose - our standins for <code>runReactionSimulation</code>. We can turn our attention to the HTTP server.</p>
+<p>A server is basically just a function from HTTP Requests to HTTP Responses. The request will be delivered to your server by the internet, usually coming from a web browser. It is a block of ASCII text not unlike our cowsay picture, except that the text contains a URL, some metadata, a ‘verb’ (<code>GET</code>, <code>POST</code>, <code>PUT</code>, <code>DELETE</code>, or a hand full of others), and perhaps some auxiliary data. The server we write will parse that request and deliver the pieces to you. You will use them to determine what the user wanted, then build up a response - another block of text - to send back to the browser.</p>
+<p>We wand our users to be able to ask for numbers to be doubled, or to have phrases cow-said, and we will ask them to use the URL bar for this. To get twice the number <code>20</code>, we ask them to visit</p>
+<pre><code>http://example.com/doubleit/20</code></pre>
+<p>For a cow saying <code>anything_at_all</code>:</p>
+<pre><code>http://example.com/cowsay/anything_at_all</code></pre>
+<p>We also want the user to see our static assets (<code>index.html</code> et. al.) when they visit <code>http://example.com/</code>.</p>
+<p>The specification so far probably seems simple enough, but writing that software to handle the traffic may be more daunting. Getting it up and running actually isn’t as hard as you might imagine. Maintaining it and keeping the bugs out is probably harder than you expect.</p>
+<p>Let’s just look at some code. The following example is a complete working web server that implements our spec.</p>
+<div class="sourceCode"><table class="sourceCode haskell numberLines"><tr class="sourceCode"><td class="lineNumbers"><pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+</pre></td><td class="sourceCode"><pre><code class="sourceCode haskell"><span class="ot">{-# LANGUAGE OverloadedStrings #-}</span>
+
+<span class="kw">import </span><span class="dt">Control.Monad.IO.Class</span> (liftIO)
+<span class="kw">import </span><span class="dt">Data.ByteString.Char8</span>  (append, pack, unpack)
+<span class="kw">import </span><span class="dt">Data.Maybe</span>             (maybeToList)
+<span class="kw">import </span><span class="dt">Snap</span>                   (getParam, ifTop, route, writeBS)
+<span class="kw">import </span><span class="dt">Snap.Http.Server</span>       (commandLineConfig, quickHttpServe)
+<span class="kw">import </span><span class="dt">Snap.Util.FileServe</span>    (serveFile)
+<span class="kw">import </span><span class="dt">System.Process</span>         (readProcess)
+
+<span class="fu">------------------------------------------------------------------------------</span>
+<span class="co">-- | List of shell commands we&#39;ll make available to the server</span>
+cmds <span class="fu">=</span> [<span class="st">&quot;doubleit&quot;</span>, <span class="st">&quot;cowsay&quot;</span>]
+
+<span class="fu">------------------------------------------------------------------------------</span>
+<span class="co">-- | A list of pairs: (Query striing to pattern-match from the URL, Handler)</span>
+routes <span class="fu">=</span> [ (<span class="st">&quot;/:cmd/:arg&quot;</span>, serveCommand cmds             ),
+           (<span class="st">&quot;&quot;</span>,           ifTop (serveFile <span class="st">&quot;index.html&quot;</span>))
+         ]
+
+<span class="fu">------------------------------------------------------------------------------</span>
+<span class="co">-- | Main function chooses between serving static assets</span>
+<span class="co">--   and handling command requests</span>
+main <span class="fu">=</span> quickHttpServe (route routes)
+
+<span class="fu">------------------------------------------------------------------------------</span>
+<span class="co">-- | Handler to extract the command name and argument string</span>
+<span class="co">--   from the request, run it, and respond with the command&#39;s output</span>
+serveCommand okCmds <span class="fu">=</span> <span class="kw">do</span>
+  cmd <span class="ot">&lt;-</span> getParam <span class="st">&quot;cmd&quot;</span>
+  arg <span class="ot">&lt;-</span> maybeToList <span class="fu">&lt;$&gt;</span> getParam <span class="st">&quot;arg&quot;</span>
+  <span class="kw">case</span> cmd <span class="kw">of</span>
+    <span class="dt">Nothing</span> <span class="ot">-&gt;</span> writeBS <span class="st">&quot;No command&quot;</span>
+    <span class="dt">Just</span> c
+      <span class="fu">|</span> c <span class="ot">`notElem`</span> okCmds <span class="ot">-&gt;</span>
+        writeBS (append c <span class="st">&quot; is not an ok command&quot;</span>)
+      <span class="fu">|</span> otherwise <span class="ot">-&gt;</span> <span class="kw">do</span>
+          retString <span class="ot">&lt;-</span> liftIO (readProcess (unpack c) (map unpack arg) <span class="st">&quot;&quot;</span>)
+          writeBS (pack retString)</code></pre></td></tr></table></div>
+<p>This is probably more intimidating than the other code examples we’ve seen, and some of the conventions are different from what we may be used to. But we still haven’t broken past 40 lines of code.</p>
+<p>The first 10 lines are just listing the functions we’re importing from the <a href="http://haskell.org">Haskell</a> web framework <a href="http://snapframework.com">Snap</a>. Lines 13 and 17 are values we’re creating for later use - a list of strings corresponding to the commands on our computer we’ll access, and then a list of <code>routes</code>.</p>
+<p>Each <code>route</code> is a pair of a URL pattern and a handler function to execute if the pattern matches. The <code>route</code> <code>&quot;/:cmd/:arg&quot;</code> will match any URL with the shape <code>http://example.com/something/another</code> - and we pair that pattern with <code>serveCommand cmds</code>, a function we write on lines 29-39. The next route only matches <code>http://example.com/</code>. That request will get routed to a function we imported from <code>Snap</code> for fetching files from the hard drive and sending them back to our client. <code>Snap</code> provides similar functions for allowing access to entire directories - you would do that if your site had more static assets than just a single <code>index.html</code> file.</p>
+<p>The implementation of <code>serveCommand</code> pulls out the part of the URL matching our <code>:cmd</code> in the route pattern and the part matching <code>:arg</code>. We test whether the <code>:cmd</code> part was empty (handling that case on line 33), and if not empty, we check to see that it is in the list of valid commands (line 35). On line 38, we finally pass the command and argument parts to the function <a href="https://hackage.haskell.org/package/process-1.4.1.0/docs/System-Process.html#v:readProcess">readProcess</a>, which calls out to the shell environment to execute whatever command and argument were extracted from the URL<a href="#fn1" class="footnoteRef" id="fnref1"><sup>1</sup></a>.</p>
+<p>We can achieve the same thing with a <a href="https://www.python.org">Python</a> script using the <a href="http://flask.pocoo.org/">Flask</a> framework.</p>
+<div class="sourceCode"><table class="sourceCode python numberLines"><tr class="sourceCode"><td class="lineNumbers"><pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+</pre></td><td class="sourceCode"><pre><code class="sourceCode python"><span class="im">from</span> flask <span class="im">import</span> Flask
+<span class="im">import</span> os
+<span class="im">import</span> subprocess
+app <span class="op">=</span> Flask(<span class="va">__name__</span>)
+
+okCmds <span class="op">=</span> <span class="bu">frozenset</span>([<span class="st">&quot;cowsay&quot;</span>,<span class="st">&quot;doubleit&quot;</span>])
+
+<span class="at">@app.route</span>(<span class="st">&#39;/&lt;cmd&gt;/&lt;arg&gt;&#39;</span>)
+<span class="kw">def</span> runCmd(cmd,arg):
+    <span class="cf">if</span> cmd <span class="op">in</span> okCmds:
+        o <span class="op">=</span> subprocess.check_output([cmd,arg])
+        <span class="cf">return</span> (<span class="st">&#39;&lt;pre&gt;&#39;</span> <span class="op">+</span> o <span class="op">+</span> <span class="st">&#39;&lt;/pre&gt;&#39;</span>)
+    <span class="cf">else</span>:
+        <span class="cf">return</span> ( cmd <span class="op">+</span> <span class="st">&#39; is not an ok command.&#39;</span> )
+
+<span class="at">@app.route</span>(<span class="st">&#39;/&#39;</span>)
+<span class="kw">def</span> index():
+  <span class="cf">return</span> <span class="st">&quot;Hi&quot;</span>
+
+<span class="cf">if</span> <span class="va">__name__</span> <span class="op">==</span> <span class="st">&quot;__main__&quot;</span>:
+    app.run(host<span class="op">=</span><span class="st">&quot;0.0.0.0&quot;</span>, port<span class="op">=</span><span class="dv">8000</span>)</code></pre></td></tr></table></div>
+<p>Flask provides a similar set of tools for taking a request, breaking it into parts, matching on the URL, and returning a response. This code has the advantage that we can run it in Python without needing to run a compiler. That can make it easier to get started and to experiment. The disadvantage is that there is no compiler to check the code; and Python’s increased flexibility means that it’s easier to stretch into postures that are bugs. Writing the above Python server was fun, but nearly every line contained a bug that I didn’t catch until running the program. When programs get bigger (as our server will when we graduate from <code>cowsay</code> to ReactionMechanismGenerator, we will see just how many places for bugs to shelter and enjoy the warmth emanating from our server machine).</p>
+<p>We run the server code the same way we run any program. In the compiled Haskell case[^1], we run our generated executable <code>shell-base-server</code>, optionally passing the aragument <code>-p 80</code>. This argument specifies the port for the server to connect to. When debugging, we often default to port 8000. Port 80 will expose your program to the public internet. You will have to start the program as <code>sudo</code> to access port 80. To run the Python server, pass the code to the Python interpreter: <code>python server.py</code>; the port selection in this case is made in the script.</p>
+<p>Next time, we will talk about picking a server for the specific needs of a given project, and get to work building it out to those specs.</p>
+<div class="footnotes">
+<hr />
+<ol>
+<li id="fn1"><p>The instances of <a href="http://hackage.haskell.org/package/bytestring-0.9.2.1/docs/Data-ByteString.html#v:pack">pack</a> and <a href="http://hackage.haskell.org/package/bytestring-0.9.2.1/docs/Data-ByteString.html#v:unpack">unpack</a> are transforming between different representations of text strings available in <code>Haskell</code>. <a href="https://hackage.haskell.org/package/transformers-0.4.2.0/docs/Control-Monad-IO-Class.html#v:liftIO">liftIO</a> allows arbitrary IO actions to be embedded into the <code>Snap</code> monad. Making sense of these things requires studying <a href="http://haskell.org">Haskell</a> the language and the <a href="http://snapframework.com">Snap Framework</a>, which each have great online documentation and communities.<a href="#fnref1">↩</a></p></li>
+</ol>
+</div>
+]]></summary>
+</entry>
+<entry>
+    <title>Opening your research up to the web - Day 1</title>
+    <link href="https://cbmm.github.io/posts/2016-01-11-opening-up-your-research-day-1.html" />
+    <id>https://cbmm.github.io/posts/2016-01-11-opening-up-your-research-day-1.html</id>
+    <published>2016-01-11T00:00:00Z</published>
+    <updated>2016-01-11T00:00:00Z</updated>
+    <summary type="html"><![CDATA[<div class="info">
+    Posted on January 11, 2016
+    
+        by Greg Hale
+    
+</div>
+<div class="info">
+    
+    Tags: 
+    
+</div>
+
+<p>Day 1 of <a href="http://student.mit.edu/searchiap/iap-9289af8f51100344015126e75301021d.html">Opening your Research</a> was a big hit! Five people showed up. Three of them are young grad students. One is an MIT alum from the class of ’77, who took <a href="http://people.csail.mit.edu/phw/">Patrick Winston</a>’s (my dear boss) first <a href="https://ai6034.mit.edu/wiki/index.php?title=Main_Page">Intro to Artificial Intelligence</a> class. And finally there was an MIT alum in his 40’s who holds some of the early wind-energy patents. Great group! I’m disappointed that the ’77 alum won’t be sticking around, but the remainder sound like they will be here for the week. That’s enough time for us to get some things done.</p>
+<p>Let’s take a look at the goals I write down earlier today and see if we met them.</p>
+<blockquote>
+<ul>
+<li>Start collaborative relationships with at least a few students interested in giving their research an online presence.</li>
+<li>Give everyone enough confidence to continue learning and implement their own data/tool-sharing when they’re ready</li>
+</ul>
+</blockquote>
+<!--more-->
+<p>I probably was overly concerned here and set out easy goals to hit, because I think we did manage to hit these. We had nice chemistry as a group, people were comfortable to fit in and pipe up. I was really impressed by the students. At the same time, some had never heard of the tools I consider completely standard, like GitHub. One student in particular seemed to have an epiphany during the class, about how useful it would be if there were some system for organizing the efforts of people collaborating on software. I interrupted him to show him <a href="https://github.com/snapframework/snap/pull/166">this</a> pull request for <a href="http://snapframework.com">snap</a>, a Haskell web framework with a pretty active user base. His mind appeared to be blown. I’m really optimistic that this kind of exposure to open source for successful senior engineers will be great for both sides.</p>
+<p>What did we do? Three things mainly:</p>
+<ol style="list-style-type: decimal">
+<li>Personal introductions</li>
+<li>Round-table brainstorming on a project to tackle for the week</li>
+<li>Little demos of various online tools (<a href="https://jaspervdj.be/hakyll/">Hakyll</a>, <a href="http://github.com">GitHub</a>, <a href="https://pages.github.com/">GitHub Pages</a>, <a href="http://markup.rocks/">markup.rocks</a>, and the <a href="https://developer.chrome.com/devtools">Chrome DevTools</a></li>
+<li>Discussed when static sites are ok and when you need to turn to custom servers and AWS</li>
+<li>Set up an html/css/js inches-to-cm converter and hosted it on GitHub Pages</li>
+</ol>
+<p>That last point got 50% done with all students in attendance. But we did a lot of talking and didn’t finish. So the last 50% was done with one student in the half-hour after class officially ended. This phase may have been my favorite, in fact, because I was free to make a lot of mistakes, and the student and I (I hope to memorize all their names next time) got to troubleshoot together. How does it work? Let me show you!</p>
+<p>We started by initializing a new git repository.</p>
+<pre><code>mkdir inches &amp;&amp; cd inches
+git init</code></pre>
+<p>and made our <code>index.html</code> file</p>
+<div class="sourceCode"><pre class="sourceCode html"><code class="sourceCode html"><span class="kw">&lt;html&gt;</span>
+  <span class="kw">&lt;head&gt;</span> <span class="kw">&lt;/head&gt;</span>
+  <span class="kw">&lt;body&gt;</span>
+    <span class="kw">&lt;h1</span><span class="ot"> class=</span><span class="st">&quot;myheader&quot;</span><span class="kw">&gt;</span>Inches to CM converter<span class="kw">&lt;/h1&gt;</span>
+    Inches: <span class="kw">&lt;input</span><span class="ot"> type=</span><span class="st">&quot;text&quot;</span><span class="ot"> id=</span><span class="st">&quot;inchesField&quot;</span><span class="kw">&gt;&lt;/input&gt;</span>
+    <span class="kw">&lt;br/&gt;</span>
+    CM: <span class="kw">&lt;input</span><span class="ot"> type=</span><span class="st">&quot;text&quot;</span><span class="ot"> id=</span><span class="st">&quot;cmField&quot;</span><span class="ot"> disabled=</span><span class="st">&quot;disabled&quot;</span><span class="kw">&gt;&lt;/input&gt;</span>
+  <span class="kw">&lt;/body&gt;</span>
+<span class="kw">&lt;/html&gt;</span></code></pre></div>
+<p>We have our html tags, a couple of which have <code>type</code> and <code>id</code> attributes. For a really nice introduction to these kinds of things, check out <a href="https://www.codecademy.com/">CodeAcademy</a> for a 2-3 hour interactive tutorial (in all honesty, I had done only a tiny bit of html and zero css, before taking the CourseAcademy classes on html and css). If you are still following along, venture on :).</p>
+<p>I then wanted to demo a little bit of css styling. We made a file <code>default.css</code>:</p>
+<div class="sourceCode"><pre class="sourceCode css"><code class="sourceCode css"><span class="fl">.myheader</span> <span class="kw">{</span>
+  <span class="kw">background-color:</span> <span class="dt">green</span><span class="kw">;</span>
+  <span class="kw">box-shadow:</span> <span class="dt">5px</span> <span class="dt">5px</span> <span class="dt">5px</span> <span class="dt">black</span><span class="kw">;</span>
+<span class="kw">}</span></code></pre></div>
+<p>We have to modify <code>index.html</code> to link this file in, by changing the <code>&lt;head&gt;</code> tag:</p>
+<div class="sourceCode"><pre class="sourceCode html"><code class="sourceCode html">  <span class="kw">&lt;head&gt;</span>
+    <span class="kw">&lt;link</span><span class="ot"> rel=</span><span class="st">&quot;stylesheet&quot;</span><span class="ot"> href=</span><span class="st">&quot;default.css&quot;</span><span class="kw">&gt;&lt;/link&gt;</span>
+  <span class="kw">&lt;/head&gt;</span></code></pre></div>
+<p>We then type <code>file:///Users/greghale/Programming/inches/index.html</code> in the browser’s url bar to see what we’ve done. Right-clicking on the big text header and choosing ‘Inspect’ in Chrome, we can pick a new color we like graphically and copy the color value back into <code>default.css</code></p>
+<p><img style="width:300px;" src="/images/openingresearch/devtools.png"></img></p>
+<p>With the basic layout (content in the <code>.html</code>, styles in the <code>.css</code>), we set out to do the unit conversion in JavaScript. First we made a couple changes to the <code>.html</code> file to link in a JavaScript file we would write, and also to bring in <a href="http://jquery.com">jQuery</a>, which makes connecting the js code to the elements on the page (the DOM), a bit easier:</p>
+<div class="sourceCode"><pre class="sourceCode html"><code class="sourceCode html"><span class="kw">&lt;html&gt;</span>
+  <span class="kw">&lt;head&gt;</span>
+    <span class="kw">&lt;link</span><span class="ot"> rel=</span><span class="st">&quot;stylesheet&quot;</span><span class="ot"> href=</span><span class="st">&quot;default.css&quot;</span><span class="kw">&gt;&lt;/link&gt;</span>
+    <span class="kw">&lt;script</span><span class="ot"> src=</span><span class="st">&quot;http://code.jquery.com/jquery-1.12.0.min.js&quot;</span><span class="kw">&gt;&lt;/script&gt;</span>
+  <span class="kw">&lt;/head&gt;</span>
+  <span class="kw">&lt;body&gt;</span>
+    <span class="kw">&lt;h1</span><span class="ot"> class=</span><span class="st">&quot;myheader&quot;</span><span class="kw">&gt;</span>Inches to CM converter<span class="kw">&lt;/h1&gt;</span>
+    Inches: <span class="kw">&lt;input</span><span class="ot"> type=</span><span class="st">&quot;text&quot;</span><span class="ot"> id=</span><span class="st">&quot;inchesField&quot;</span><span class="kw">&gt;&lt;/input&gt;</span>
+    <span class="kw">&lt;br/&gt;</span>
+    CM: <span class="kw">&lt;input</span><span class="ot"> type=</span><span class="st">&quot;text&quot;</span><span class="ot"> id=</span><span class="st">&quot;cmField&quot;</span><span class="ot"> disabled=</span><span class="st">&quot;disabled&quot;</span><span class="kw">&gt;&lt;/input&gt;</span>
+    <span class="kw">&lt;script</span><span class="ot"> src=</span><span class="st">&quot;calc.js&quot;</span><span class="kw">&gt;&lt;/script&gt;</span>
+  <span class="kw">&lt;/body&gt;</span>
+<span class="kw">&lt;/html&gt;</span></code></pre></div>
+<p>Then the <code>.js</code> file, which we wrote piece-by-piece, loading in the work so far through <code>index.html</code> and testing parts by hand, before wiring them all together.</p>
+<div class="sourceCode"><pre class="sourceCode javascript"><code class="sourceCode javascript"><span class="kw">function</span> <span class="at">calc</span> ()<span class="op">{</span>
+    cmVal <span class="op">=</span> <span class="at">inToCm</span>( <span class="at">parseFloat</span>(<span class="va">inchesField</span>.<span class="at">value</span>) )<span class="op">;</span>
+    <span class="va">cmField</span>.<span class="at">value</span> <span class="op">=</span> cmVal<span class="op">;</span>
+<span class="op">}</span>
+
+<span class="kw">function</span> <span class="at">inToCm</span>(x)<span class="op">{</span>
+    <span class="cf">return</span> (x<span class="op">*</span><span class="fl">2.54</span>)<span class="op">;</span>
+<span class="op">}</span>
+
+<span class="kw">function</span> <span class="at">setup</span>() <span class="op">{</span>
+    <span class="va">console</span>.<span class="at">log</span>(<span class="st">&#39;test&#39;</span>)<span class="op">;</span>
+    inchesField <span class="op">=</span> <span class="at">$</span>(<span class="st">&#39;#in&#39;</span>)[<span class="dv">0</span>]<span class="op">;</span>
+    cmField <span class="op">=</span> <span class="at">$</span>(<span class="st">&#39;#cm&#39;</span>)[<span class="dv">0</span>]<span class="op">;</span>
+    <span class="va">inchesField</span>.<span class="at">onkeyup</span> <span class="op">=</span> calc<span class="op">;</span>
+<span class="op">}</span>
+
+<span class="at">$</span>(<span class="st">&#39;document&#39;</span>).<span class="at">ready</span>(<span class="kw">function</span>()<span class="op">{</span>
+    <span class="va">console</span>.<span class="at">log</span>(<span class="st">&#39;ready!&#39;</span>)<span class="op">;</span>
+    <span class="at">setup</span>()<span class="op">;</span>
+<span class="op">}</span>)<span class="op">;</span></code></pre></div>
+<p>That wasn’t very much code (30 lines or so?). Here is the final result. Although there is a lot of jargon around the particular tags and functions, but what I hope to convey is that web development is entirely within reach. You just have to not be intimidated by learning the three syntaxes of html, css, and javascript. And you have to feel comfortable googling when you come up against a problem.</p>
+<script src="http://code.jquery.com/jquery-1.12.0.min.js"></script>
+<script>
+
+function calc (){
+    cmVal = inToCm( parseFloat (inchesField.value) );
+    cmField.value = cmVal;
+}
+
+function inToCm(x){
+    return (x*2.54);
+}
+
+function setup() {
+    console.log('test');
+    inchesField = $('#in')[0];
+    cmField = $('#cm')[0];
+    inchesField.onkeyup = calc;
+}
+
+$('document').ready(function(){
+    console.log('ready!');
+    setup();
+});
+</script>
+<div class="demo" style="border: 1px solid black;max-width:400px;padding:20px;">
+<h1 class="text" style="background-color:#6A6AA5;box-shadow: 5px 5px 5px black;color:black;">
+Inches to CM converter
+</h1>
+<p>Inches<input type="text" id="in" ></input> <br></br> CM<input type="text" id="cm" disabled="disabled"></input></p>
+</div>
+<h1 id="hosting">Hosting</h1>
+<p>The last step was to push this all to a waiting github repository, using the <code>gh-pages</code> branch to get free file hosting. (You won’t be able to copy-paste these commands, because they point to my github account, but this will work for your account if you have your <a href="https://help.github.com/articles/generating-ssh-keys/">ssh keys</a> set up)</p>
+<pre><code>git checkout -b gh-pages
+git add *.html
+git add *.css
+git add *.js
+git commit -m &quot;Initial commit&quot;
+git remote add origin git@github.com:imalsogreg/inches
+git push origin gh-pages</code></pre>
+<h1 id="research-areas">Research areas</h1>
+<p>Some of the research areas and web topics the students brought up:</p>
+<ul>
+<li>Clean energy</li>
+<li>Static sites (not hosted too well)</li>
+<li>Chemistry interactive</li>
+<li>Cancer therapy crowd-source game</li>
+</ul>
+<p>I’m really looking forward to diving in and picking something concrete to work on in the next class!</p>
+]]></summary>
+</entry>
+<entry>
+    <title>Opening up your research class - Day 0</title>
+    <link href="https://cbmm.github.io/posts/2016-01-11-opening-up-your-research-day-0.html" />
+    <id>https://cbmm.github.io/posts/2016-01-11-opening-up-your-research-day-0.html</id>
+    <published>2016-01-11T00:00:00Z</published>
+    <updated>2016-01-11T00:00:00Z</updated>
+    <summary type="html"><![CDATA[<div class="info">
+    Posted on January 11, 2016
+    
+        by Greg Hale
+    
+</div>
+<div class="info">
+    
+    Tags: <a href="/tags/teaching.html">teaching</a>, <a href="/tags/open%20science.html">open science</a>
+    
+</div>
+
+<h1 id="goals">Goals</h1>
+<ul>
+<li>Start collaborative relationships with at least a few students interested in giving their research an online presence.</li>
+<li>Give everyone enough confidence to continue learning and implement their own data/tool-sharing when they’re ready</li>
+</ul>
+<h1 id="ideas">Ideas</h1>
+<ul>
+<li>Datasets on S3 with descriptions on github-pages</li>
+<li>Contributing to reffit and reffit-like projects (peer review reform)</li>
+<li>Stand-alone servers running algorithm demos</li>
+<li>Programmatic figure generation, interactive graphics</li>
+<li>Helpful lab-widget webapps (calculators, timers, etc.)</li>
+<li>Publishing negative results as a blog post</li>
+</ul>
+<h1 id="predictions">Predictions</h1>
+<!--more-->
+<p>Teaching the <a href="/posts/2016-01-08-iap-git-class.html">git introduction</a> showed me just how many micro-steps one has to take before feeling comfortable with basic coding and web technologies - it’s easy to forget that as you become comfortable yourself. In this class we might try to go way beyond just ‘get my project onto GitHub’. There’s some chance that either (a) there is no middle-ground where a researcher can learn enough about web tooling without sacrificing their research time, or (b) I won’t manage to lead the class to that middle-ground. That’s something to keep in mind as we start, and a good goal to keep coming back to.</p>
+]]></summary>
+</entry>
+<entry>
+    <title>Teaching Git & Github</title>
+    <link href="https://cbmm.github.io/posts/2016-01-08-iap-git-class.html" />
+    <id>https://cbmm.github.io/posts/2016-01-08-iap-git-class.html</id>
+    <published>2016-01-08T00:00:00Z</published>
+    <updated>2016-01-08T00:00:00Z</updated>
+    <summary type="html"><![CDATA[<div class="info">
+    Posted on January  8, 2016
+    
+        by Greg Hale
+    
+</div>
+<div class="info">
+    
+    Tags: <a href="/tags/git.html">git</a>, <a href="/tags/github.html">github</a>, <a href="/tags/teaching.html">teaching</a>
+    
+</div>
+
+<p>Today was the last of three one-day sessions on <a href="https://git-scm.com">git</a> and <a href="https://github.com">GitHub</a> (<a href="http://student.mit.edu/searchiap/iap-9289af8f51100344015126db3107020f.html">here</a> is the course description). Next week I’ll lead a one-week course called <a href="http://student.mit.edu/searchiap/iap-9289af8f51100344015126e75301021d.html">Opening up your research to the web</a>.</p>
+<p>We had 18 students in total, most coming for just a single 1.5 hour session. Students’ ages were anywhere from 17 to 60, with the elder ones tending to be there to listen. The average reason for attending was more or less:</p>
+<!--more-->
+<blockquote>
+<p>Our lab started using some software that’s hosted on github, and I’m confused about how to keep track of different versions.</p>
+</blockquote>
+<p>My goal in the class was to give students some muscle memory for working with git and GitHub. So I only lectured at the board for 5 minutes or so, then we immediately jumped in to exercises - namely cloning and contributing to a fake repository I set up at <a href="https://github.com/imalsogreg/gitdemo" class="uri">https://github.com/imalsogreg/gitdemo</a>.</p>
+<p>Students forked this repository to their own GitHub accounts (perhaps one still exists <a href="https://github.com/yunboyer/gitdemo">here</a>?), and each cloned the repository to their laptop, made a change, pushed their work back to github, and then issued pull requests to me. I integrated each pull request back into the original <code>gitdemo</code> repository in turn. Sometimes the merges were successful. Other times, one student’s work being integrated into the central repository would conflict with the merge of a later student’s work, so we got to see how merge conflicts are resolved.</p>
+<p>It takes a lot more than a couple of hours to get used to version control, learning the jargon, and grasping which aspects of git are mandatory and which are just parts of workflow convention. But I think the students all came away with a very solid grasp of the basics and how to move forward. All in all, for git I really like the interactive format.</p>
+<p>There are lots of online guides to git, particularly good ones are <a href="https://try.github.io/levels/1/challenges/1">try.github.io</a> and <a href="https://git-scm.com/doc">git-scm.com</a>.</p>
+]]></summary>
+</entry>
+<entry>
+    <title>Hakyll setup</title>
+    <link href="https://cbmm.github.io/posts/2016-01-07-hakyll-setup.html" />
+    <id>https://cbmm.github.io/posts/2016-01-07-hakyll-setup.html</id>
+    <published>2016-01-07T00:00:00Z</published>
+    <updated>2016-01-07T00:00:00Z</updated>
+    <summary type="html"><![CDATA[<div class="info">
+    Posted on January  7, 2016
+    
+        by Greg Hale
+    
+</div>
+<div class="info">
+    
+    Tags: <a href="/tags/blog.html">blog</a>, <a href="/tags/web.html">web</a>, <a href="/tags/hakyll.html">hakyll</a>, <a href="/tags/pandoc.html">pandoc</a>
+    
+</div>
+
+<p>Here is the first post on the CBMM @ Github website. As explained on the <a href="/about.html">About</a> page, we wanted a space to organize the open-source activity going on at the <a href="http://cbmm.mit.edu">CBMM</a>, beyond just the wall of repositories on our github <a href="https://github.com/CBMM">org page</a>.</p>
+<p>The design decisions reflect the broader universe of the CBMM software situation. The developer staff is small, and there are far more projects to do than people to do them. At the same time we want the site to be reliable to maintain and simple to edit with the same workflow that we use for developing software. We also want the development process to be totally <em>open</em>. So, <a href="https://pages.github.com/">GitHub pages</a> is an extremely good fit for hosting. We don’t have to do any maintenance or worry at all about backups. And the site content is generated mainly from <a href="http://commonmark.org/help/">markdown</a> via the fantastic document converter <a href="http://pandoc.org">pandoc</a> and static site generator <a href="http://jaspervdj.be/hakyll">Hakyll</a>.</p>
+<!--more-->
+<p>We will be exercising Pandoc and Hakyll more in the future, especially looking at whether they are a good fit for publication-like posts with references and figures. But for now, getting basic blog functionality, quick uploads, and very small page sizes, I’m happy with the tech choices.</p>
+<p>The rest of this post consists notes on design goals and things that needed tweaking for all the parts to fit together. If they help inform you in your own site set-up, then I’m happy.</p>
+<h2 id="load-time">Load time</h2>
+<p>Fast page loads are important<a href="#fn1" class="footnoteRef" id="fnref1"><sup>1</sup></a>, and high-res monitors are becoming more popular, so the big banner at the top is an SVG image drawn in <a href="https://inkscape.org/en/">inkscape</a> and weighing in at a delicate 24.1 kB (right-click, the choose <code>select</code> from the context menu, find the <code>Network</code> tab, and reload the page to get a listing of the assets and their sizes). I went with Yahoo’s <a href="http://purecss.io">Pure CSS</a> for a change, instead of the more typical <a href="http://getbootstrap.com">Twitter Bootstrap</a>. Together Pure’s files are less than 6 kB (compared to bootstap, which is closer to 30 kB). These are all <em>very</em> small numbers. But it was fun to get to try something different. Getting the responsive display hamburger menu working required copying some HTML from the <a href="http://purecss.io/layouts/side-menu/">side-menu</a> Pure layout example.</p>
+<h2 id="sticky-footerlongnote">Sticky Footer<a href="#fn2" class="footnoteRef" id="fnref2"><sup>2</sup></a></h2>
+<p>The <a href="https://philipwalton.github.io/solved-by-flexbox/demos/sticky-footer/">recommended trick</a> of using a flexbox to achieve a sticky footer<a href="#fn3" class="footnoteRef" id="fnref3"><sup>3</sup></a> didn’t work for me, probably because the responsive nav element has a strange shape that confuses the flexbox layout (or possibly just the <em>person</em> trying to use the flexbox layout).</p>
+<p>The workaround was to wrap all of the <code>body</code> content together in a <code>&lt;div class=&quot;layout&quot;&gt;</code> and make that layout div the <code>display: flex</code> container, rather that assigning that role directly to the <code>&lt;body&gt;</code>.</p>
+<h2 id="hamburger-space">Hamburger space</h2>
+<p>I prefer when the a sliding side menu covers the underlying content, rather than pushing the content over to make space. The latter is the default in PureCSS’s <code>side-menu</code> layout. Changing that was a matter of dropping the <code>left: 150px</code> in the <code>#layout.active</code> property of <code>side-menu.css</code>.</p>
+<h2 id="active-link">Active link</h2>
+<p>Although PureCSS offers some javascript to highlight the menu item corresponding to the page you’re looking at, I wanted to try to handle this statically in Hakyll, and I followed <a href="http://mesokurtosis.com/posts/2015-02-22-pages.html">Mesokurtosis’s</a> blog instructions to a T. Frankly I don’t have any intuition about how Hakyll’s templating system or compilers work (I should get on that!). Fortunately, one can clearly put a site together without understanding very much.</p>
+<h2 id="teasers-rss-and-tags">Teasers, RSS, and Tags</h2>
+<p>Here again, I have some homework to do to understand the Hakyll compilation process. I followed verbatim the <a href="https://github.com/jaspervdj/hakyll/blob/master/web/tutorials/using-teasers-in-hakyll.markdown">instructions</a> from Hakyll’s author, <a href="https://jaspervdj.be/">Jasper Van der Jeugt</a>, and another more hand-holding <a href="http://reichertbrothers.com/blog/posts/2014-04-08-hakyll-teasers.html">guide</a>.</p>
+<p>To set up the RSS feed I followed another of Jasper’s <a href="https://jaspervdj.be/hakyll/tutorials/05-snapshots-feeds.html">tutorial</a>s. And for post tags, I looked at his own blog’s <a href="https://github.com/jaspervdj/jaspervdj/blob/d0d76d0728f7827357b1ac8b9193f0630eda9019/src/Main.hs#L82-L97">repository</a> and another <a href="http://javran.github.io/posts/2014-03-01-add-tags-to-your-hakyll-blog.html">guide</a>. I’d be lying if I didn’t admit some shame for taking so many shortcuts! But please do have a look at the <a href="https://github.com/CBMM/CBMM.github.io">repository</a> and feel free to clone the whole thing if this is a reasonably starting-point for your own Hakyll blog.</p>
+<h2 id="deployment">Deployment</h2>
+<p>To manage the interaction with GitHub Pages, I keep all of the site’s sources on the <a href="https://github.com/CBMM/CBMM.github.io/tree/hakyll">hakyll branch</a>. When Hakyll compiles a site, it puts the whole thing into a directory called <code>_site</code> in the root of the project. By adding this repository’s <code>master</code> branch as a <a href="https://git-scm.com/docs/git-submodule">submodule</a> under the name <code>_site</code>, I’m able to deploy the site by simply <code>cd</code>ing into <code>_site</code>, committing all the files and pushing them to the master branch. This method I learned from a <a href="http://www.stackbuilders.com">Stack Builders</a> blog <a href="http://www.stackbuilders.com/news/dr-hakyll-create-a-github-page-with-hakyll-and-circleci">post</a>. The script to do the pushing is <a href="https://github.com/CBMM/CBMM.github.io/blob/hakyll/deploy.sh">here</a>.</p>
+<div class="footnotes">
+<hr />
+<ol>
+<li id="fn1"><p><a href="https://vimeo.com/147806338">The Web Obesity Crisis</a><a href="#fnref1">↩</a></p></li>
+<li id="fn2"><p>Sometimes it’s the easiest-seeming things that are hardest in programming and web design. ‘Sticky footer’ refers to the ability for the page’s footer to stick to the very bottom of the window, even if the window’s other content is short and doesn’t reach the bottom. It can be surprisingly hard to make this happen reliably. See the <a href="https://philipwalton.github.io/solved-by-flexbox/demos/sticky-footer/">flexbox solution</a> for a clearer demo of what I mean here. Relatedly, <a href="https://en.wikipedia.org/wiki/Holy_Grail_(web_design)">this</a> pattern is called the “Holy Grail” layout, because it’s often what the designer has in mind while being surprisingly tricky to implement.<a href="#fnref2">↩</a></p></li>
+<li id="fn3"><p><a href="https://philipwalton.github.io/solved-by-flexbox/demos/sticky-footer/" class="uri">https://philipwalton.github.io/solved-by-flexbox/demos/sticky-footer/</a><a href="#fnref3">↩</a></p></li>
+</ol>
+</div>
+]]></summary>
+</entry>
+
+</feed>
