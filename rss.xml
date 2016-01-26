@@ -7,8 +7,290 @@
         <description><![CDATA[Replace me]]></description>
         <atom:link href="http://example.com/rss.xml" rel="self"
                    type="application/rss+xml" />
-        <lastBuildDate>Mon, 11 Jan 2016 00:00:00 UT</lastBuildDate>
+        <lastBuildDate>Wed, 13 Jan 2016 00:00:00 UT</lastBuildDate>
         <item>
+    <title>Opening your research up to the web - Day 3</title>
+    <link>http://example.com/posts/2016-01-13-opening-up-your-research-day-3.html</link>
+    <description><![CDATA[<div class="info">
+    Posted on January 13, 2016
+    
+        by Greg Hale
+    
+</div>
+<div class="info">
+    
+    Tags: <a href="/tags/open%20science.html">open science</a>, <a href="/tags/teaching.html">teaching</a>, <a href="/tags/snap.html">snap</a>, <a href="/tags/flask.html">flask</a>
+    
+</div>
+
+<p>In our <a href="posts/2016-01-12-opening-up-your-research-day-2.html">last lecture</a> we set up a server to call one of several shell commands depending the URL. I wouldn’t recommend just rereading those posts in order to start web programming - instead you should refer to the very good documentation released with a web framework like <a href="http://snapframework.com">Snap</a> or <a href="http://flask.pocoo.org">Flask</a>. When you get some familiarity with the languages used (<a href="http://haskell.org">Haskell</a> and <a href="https://www.python.org">Python</a> respectively), then the details in our code samples will begin to make more sense.</p>
+<h1 id="direct-library-calls-vs.shell-commands">Direct library calls vs. shell commands</h1>
+<p>The servers we built were language agnostic. They can call any program you have installed on your system, passing arguments through the command line. Sometimes we can trade away language agnosticism for convenience and code quality. For example, if the scientific application is written in Python, and our server is written in Python, then instead of using a <code>process</code> library to call out to the shell, we can invoke our scientific function directly from the Flask handler.</p>
+<!--more-->
+<div class="sourceCode"><pre class="sourceCode python"><code class="sourceCode python"><span class="im">from</span> flask <span class="im">import</span> <span class="op">*</span>
+<span class="im">from</span> reactiongeneratormachine <span class="im">import</span> runReaction
+
+<span class="at">@app.route</span>(<span class="st">&#39;/&lt;reactants&gt;&#39;</span>)
+<span class="kw">def</span> handleReactants(reactants):
+
+    r <span class="op">=</span> json.loads(reactants)
+    <span class="cf">if</span> validate(r):
+        products  <span class="op">=</span> runReaction(r)
+        <span class="cf">return</span> jsonify(products)
+
+<span class="cf">if</span> <span class="va">__name__</span> <span class="op">==</span> <span class="st">&quot;__main__&quot;</span>:
+    app.run(host<span class="op">=</span><span class="st">&quot;0.0.0.0&quot;</span>, port<span class="op">=</span><span class="dv">80</span>)</code></pre></div>
+<p>Calling the function directly has a couple of advantages. First, if your library needs to keep some kind of configuration or state around, you can manage these things in Flask (or let the user configure the application through more URL parameters, a la <code>https://reactions.io/runReaction?q=Methane+Hydrogen&amp;temperature=285</code> and with <code>request.get.args('temperature')</code> in the handler)</p>
+<p>More importantly, calling a function directly for your handler removes the need to turn the request data into a string for the parameter to a call to the shell. In languages like Haskell where types provide huge amounts of structure to your data, this can be a strong advantage. In Python too, converting your data between wire formats appropriate for HTTP and a shell call can be tedious and error-prone, and Python’s type system will do little to help you keep all those representations in sync, and you will find that corrupted data and server crashes become more frequent and difficult to fix as both your server and your scientific code become more complex.</p>
+<h1 id="synchronous-and-asynchronous-request-handling">Synchronous and asynchronous request handling</h1>
+<p>Whether we are calling a shell command or a library function to process some data, what happens when multiple people simultaneously request some work do be done? Let’s look at a handler we used above:</p>
+<div class="sourceCode"><pre class="sourceCode python"><code class="sourceCode python"><span class="at">@app.route</span>(<span class="st">&#39;/&lt;reactants&gt;&#39;</span>)
+<span class="kw">def</span> handleReactants(reactants):
+
+    reactants <span class="op">=</span> json.loads(reactants)
+    <span class="cf">if</span> validate(reactants):
+        products  <span class="op">=</span> runReaction(reactants)
+        <span class="cf">return</span> jsonify(products)</code></pre></div>
+<p>Our function starts executing when given a <code>reactants</code> parameter by the underlying web framework. The parameter is parsed into a JSON value, validated, and sent along to <code>runReaction()</code>, which takes (let’s say) two seconds to run. When <code>runReaction()</code> returns, we serialize the result and send it back to the browser. The call to <code>runReaction()</code> is ‘synchronous’: it takes a bite from the same time budget as everything else in the handler, and we can’t move forward until it is finished running. Furthermore, if Flask itself dispatches requests to handlers synchronously, then a second user issuing a request will have to wait for processing of the first user’s request to finish before getting a turn. What’s worse, synchronous request handling would block <em>all</em> subsequent request handling, so user two wouldn’t even get to see a web page or a ‘Please wait for User 1’ message while they wait - it would look to them as though the server were down until User 1’s request is done being processed. This is of course not Ok for a webserver, and we can tell Flask to handle routes asynchronously in the call to <code>app.run()</code></p>
+<div class="sourceCode"><pre class="sourceCode python"><code class="sourceCode python"><span class="cf">if</span> <span class="va">__name__</span> <span class="op">==</span> <span class="st">&quot;__main__&quot;</span>:
+    app.run(host<span class="op">=</span><span class="st">&quot;0.0.0.0&quot;</span>, port<span class="op">=</span><span class="dv">80</span>, threaded<span class="op">=</span><span class="va">True</span>)</code></pre></div>
+<p>In our <code>Snap</code> server, request handling is threaded by default. But if we make a synchronous function call in a handler, that handler still will not return until the synchronous call finishes.</p>
+<h1 id="asynchronous-calls">Asynchronous calls</h1>
+<p>What could we do if we want to let a response come back to the user, without making their browser sit in what appears to be a inactive ‘loading’ state? Well, we would need to return <em>something</em> to the user other than the results of <code>runReaction()</code>, because <code>runReaction()</code> can’t possibly run in less than two seconds (the problem is of course much worse for really long-running computation). It turns out that the easiest way to solve our problem is to let the server stay busy during the computation (don’t return immediately), but decouple that that waiting from the loading of a page. Well, that’s vague! Let’s see some code:</p>
+<h3 id="index.html">index.html</h3>
+<div class="sourceCode"><pre class="sourceCode html"><code class="sourceCode html"><span class="kw">&lt;html&gt;</span>
+  <span class="kw">&lt;head&gt;</span>
+    <span class="kw">&lt;script</span><span class="ot"> src=</span><span class="st">&quot;http://code.jquery.com/jquery-2.2.0.js&quot;</span><span class="kw">&gt;</span>
+    <span class="kw">&lt;/script&gt;</span>
+    <span class="kw">&lt;script</span><span class="ot"> src=</span><span class="st">&quot;run.js&quot;</span><span class="kw">&gt;&lt;/script&gt;</span>
+  <span class="kw">&lt;/head&gt;</span>
+  <span class="kw">&lt;body&gt;</span>
+    <span class="kw">&lt;h1&gt;</span>Example<span class="kw">&lt;/h1&gt;</span>
+    <span class="kw">&lt;input</span><span class="ot"> type=</span><span class="st">&quot;text&quot;</span><span class="ot"> placeholder=</span><span class="st">&quot;Methane&quot;</span> 
+<span class="ot">           id=</span><span class="st">&quot;reactant-text&quot;</span><span class="kw">&gt;&lt;/input&gt;</span>
+    <span class="kw">&lt;button</span><span class="ot"> onclick=</span><span class="st">&quot;run_job();&quot;</span><span class="kw">&gt;</span>Run Job<span class="kw">&lt;/button&gt;</span>
+  <span class="kw">&lt;/body&gt;</span>
+<span class="kw">&lt;/html&gt;</span></code></pre></div>
+<h3 id="run.js">run.js</h3>
+<div class="sourceCode"><pre class="sourceCode javascript"><code class="sourceCode javascript"><span class="kw">function</span> <span class="at">run_job</span>()<span class="op">{</span>
+    <span class="kw">var</span> inParam <span class="op">=</span> <span class="at">$</span>(<span class="st">&#39;#reactant-text&#39;</span>)[<span class="dv">0</span>]<span class="op">;</span>
+    <span class="va">$</span>.<span class="at">ajax</span>(<span class="st">&#39;/runReaction/&#39;</span> <span class="op">+</span> <span class="va">inParam</span>.<span class="at">value</span><span class="op">,</span>
+           <span class="op">{</span><span class="st">&#39;success&#39;</span><span class="op">:</span> <span class="kw">function</span> (d) <span class="op">{</span>
+               <span class="at">$</span>(<span class="st">&#39;body&#39;</span>).<span class="at">append</span>(d)<span class="op">;</span>
+             <span class="op">},</span>
+            <span class="st">&#39;failure&#39;</span><span class="op">:</span> <span class="kw">function</span> (e) <span class="op">{</span> 
+              <span class="at">$</span>(<span class="st">&#39;body&#39;</span>).<span class="at">append</span>(<span class="st">&#39;Error: &#39;</span> <span class="op">+</span> e)<span class="op">;</span>
+             <span class="op">}</span>
+           <span class="op">}</span>)<span class="op">;</span>
+<span class="op">};</span></code></pre></div>
+<p>There are several new things going on here. To answer our earlier question “What do we return to the user if not the results of ‘runReaction()’?” - we’re going to just return this <code>html</code> page. The page links to the <a href="http://jquery.com">jQuery</a> library and to a script called <code>run.js</code> that we will write. The user doesn’t type any data-processing URL, instead we give the user a button that we link to a javascript function called <code>run_job()</code>.</p>
+<p>When the <code>run_job()</code> function runs (still in the browser), we first get the text value of our <code>reactant-text</code> input field (from index.html). Then we see a call to <a href="http://api.jquery.com/jquery.ajax/">$.axax()</a>. The <code>$</code> is a short name for the <code>jQuery</code> object, which provides the <code>ajax</code> function. <code>ajax</code> stands for “Asynchronous javascript and XML”. The gist of an ajax call is that it visits some URL (the first argument to <code>$.ajax()</code>), and then calls either the <code>success</code> or <code>failure</code> callbacks that you pass, depending on how things go on the server.</p>
+<p>Importantly, calls to <code>$.ajax()</code> are <em>asynchronous</em>. The ajax job runs in one of the browser’s background threads. The UI in the browser remains responsive, and the server remains responsive too, as long as it handles separate requests in separate threads. The only blocking bit is the one server thread processing our request, and this works out very well for us! The server only returns an answer when it has one, at which point the <code>success</code> callback handles it and updates the page according to how you want to display the result (here we just print the text of the result). You can see the <a href="https://www.youtube.com/watch?v=42PEVGVJVgk">results</a> and <a href="https://gist.github.com/imalsogreg/dfa352b454c68693f28b">code</a> for a more thorough worked example.</p>
+<p>At this point, you may be looking at three unfamiliar programming languages and a handful of new concepts. It would be very unusual for someone to be able to put these things into use after a single reads though. Developing web sites takes a lot of practice. Keep reading, <a href="http://google.com">google</a> liberally, <a href="http://github.com/cbmm/cbmm.github.io/issues">open an issue</a> if you find something confusing (or wrong!). You can do it! Next time we will discuss a little about making pages look nice.</p>
+]]></description>
+    <pubDate>Wed, 13 Jan 2016 00:00:00 UT</pubDate>
+    <guid>http://example.com/posts/2016-01-13-opening-up-your-research-day-3.html</guid>
+    <dc:creator>Replace me</dc:creator>
+</item>
+<item>
+    <title>Opening your research up to the web - Day 2</title>
+    <link>http://example.com/posts/2016-01-12-opening-up-your-research-day-2.html</link>
+    <description><![CDATA[<div class="info">
+    Posted on January 12, 2016
+    
+        by Greg Hale
+    
+</div>
+<div class="info">
+    
+    Tags: <a href="/tags/open%20science.html">open science</a>, <a href="/tags/teaching.html">teaching</a>, <a href="/tags/snap.html">snap</a>, <a href="/tags/flask.html">flask</a>
+    
+</div>
+
+<p><a href="http://web.mit.edu/iap">IAP</a> can giveth, and IAP can taketh away. My bustling class of five has dropped by three and picked up one new student, then lost another. But hope is not lost. We may have a real project to work on. Our student from <a href="http://chemistry.mit.edu">chemistry</a> works on a very active Python codebase called the <a href="https://reactionmechanismgenerator.github.io">Reaction Mechanism Generator</a>.</p>
+<p>Useful as it is, installing the dependencies has apparently been hard enough to limit adoption, so we want to expose some of its functionality through a web interface. Just what I had in mind for our class! We’ll dedicate our three remaining sessions to this, hope that it benefits the Reaction Mechanism Generator project, and then see if the skills we learn spill over into other projects.</p>
+<h1 id="servers">Servers</h1>
+<p>On <a href="/posts/2016-01-11-opening-up-your-research-day-1.html">Day 1</a> we talked about static assets like <code>.html</code> files, <code>.css</code> files, <code>.js</code> scripts, and images. When the all we need to do is deliver these files to a user, we don’t have to handle writing any code to serve the files; we can just find a static hosting services like <a href="https://pages.github.com">GitHub Pages</a> or <a href="https://aws.amazon.com/s3">Amazon S3</a>.</p>
+<p>But that was a whole day ago, and today we want more. We need to be able to let the user specify a computation to run - like some set of reactants and environmental conditions - and we want to run the computation and return them a set of results. The files we’d want to serve back don’t exist yet - they are the output of the simulator, so our server needs to be a little more customized.</p>
+<p>Fortunately for us, writing backend code is fun. We get to choose any language we like as long as it has a library for serving HTTP traffic. And we get to learn a little bit about <a href="http://www.tutorialspoint.com/http/http_requests">HTTP</a> and <a href="https://en.wikipedia.org/wiki/Query_string">URLs</a>.</p>
+<h1 id="warm-up">Warm-up</h1>
+<p>We’ll start with a miniaturized version of our final project goal. For some small set of programs already available on our computer, let’s write a server that calls those programs, passes them some data, and returns their result. For example, <code>cowsay</code> and <code>doubleit</code>.</p>
+<p>To get <code>cowsay</code>,</p>
+<pre><code># on osx
+brew install cowsay
+# or ubuntu
+sudo apt-get install cowsay</code></pre>
+<p>The program <code>cowsay</code> takes a string argument and returns an ASCII picture of a cow saying whatever you wrote in the string. For example:</p>
+<pre><code>&gt; cowsay This is a cowsay test
+
+ _______________________
+&lt; This is a cowsay test &gt;
+ -----------------------
+        \   ^__^
+         \  (oo)\_______
+            (__)\       )\/\
+                ||----w |
+                ||     ||
+</code></pre>
+<p>Very nice.</p>
+<p>The program <code>doubleit</code> takes a single number and returns than number multiplied by two - it does not exist yet, so let’s just write it in Python, in a file at <code>/usr/local/bin/doubleit</code></p>
+<div class="sourceCode"><pre class="sourceCode python"><code class="sourceCode python"><span class="op">!</span><span class="co">#/usr/bin/env python</span>
+
+<span class="im">import</span> sys
+
+<span class="cf">if</span> <span class="va">__name__</span> <span class="op">==</span> <span class="st">&#39;__main__&#39;</span>:
+    i <span class="op">=</span> sys.argv[<span class="dv">1</span>]
+    <span class="bu">print</span>(<span class="dv">2</span><span class="op">*</span><span class="bu">float</span>(i))</code></pre></div>
+<p>Any program printing twice its input will work, so I won’t spend time explaining this. But of course feel free to google around and pick apart any of the code examples in this series.</p>
+<p>By this point, our machine is set up with a couple programs we want to expose - our standins for <code>runReactionSimulation</code>. We can turn our attention to the HTTP server.</p>
+<p>A server is basically just a function from HTTP Requests to HTTP Responses. The request will be delivered to your server by the internet, usually coming from a web browser. It is a block of ASCII text not unlike our cowsay picture, except that the text contains a URL, some metadata, a ‘verb’ (<code>GET</code>, <code>POST</code>, <code>PUT</code>, <code>DELETE</code>, or a hand full of others), and perhaps some auxiliary data. The server we write will parse that request and deliver the pieces to you. You will use them to determine what the user wanted, then build up a response - another block of text - to send back to the browser.</p>
+<p>We wand our users to be able to ask for numbers to be doubled, or to have phrases cow-said, and we will ask them to use the URL bar for this. To get twice the number <code>20</code>, we ask them to visit</p>
+<pre><code>http://example.com/doubleit/20</code></pre>
+<p>For a cow saying <code>anything_at_all</code>:</p>
+<pre><code>http://example.com/cowsay/anything_at_all</code></pre>
+<p>We also want the user to see our static assets (<code>index.html</code> et. al.) when they visit <code>http://example.com/</code>.</p>
+<p>The specification so far probably seems simple enough, but writing that software to handle the traffic may be more daunting. Getting it up and running actually isn’t as hard as you might imagine. Maintaining it and keeping the bugs out is probably harder than you expect.</p>
+<p>Let’s just look at some code. The following example is a complete working web server that implements our spec.</p>
+<div class="sourceCode"><table class="sourceCode haskell numberLines"><tr class="sourceCode"><td class="lineNumbers"><pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+</pre></td><td class="sourceCode"><pre><code class="sourceCode haskell"><span class="ot">{-# LANGUAGE OverloadedStrings #-}</span>
+
+<span class="kw">import </span><span class="dt">Control.Monad.IO.Class</span> (liftIO)
+<span class="kw">import </span><span class="dt">Data.ByteString.Char8</span>  (append, pack, unpack)
+<span class="kw">import </span><span class="dt">Data.Maybe</span>             (maybeToList)
+<span class="kw">import </span><span class="dt">Snap</span>                   (getParam, ifTop, route, writeBS)
+<span class="kw">import </span><span class="dt">Snap.Http.Server</span>       (commandLineConfig, quickHttpServe)
+<span class="kw">import </span><span class="dt">Snap.Util.FileServe</span>    (serveFile)
+<span class="kw">import </span><span class="dt">System.Process</span>         (readProcess)
+
+<span class="fu">------------------------------------------------------------------------------</span>
+<span class="co">-- | List of shell commands we&#39;ll make available to the server</span>
+cmds <span class="fu">=</span> [<span class="st">&quot;doubleit&quot;</span>, <span class="st">&quot;cowsay&quot;</span>]
+
+<span class="fu">------------------------------------------------------------------------------</span>
+<span class="co">-- | A list of pairs: (Query striing to pattern-match from the URL, Handler)</span>
+routes <span class="fu">=</span> [ (<span class="st">&quot;/:cmd/:arg&quot;</span>, serveCommand cmds             ),
+           (<span class="st">&quot;&quot;</span>,           ifTop (serveFile <span class="st">&quot;index.html&quot;</span>))
+         ]
+
+<span class="fu">------------------------------------------------------------------------------</span>
+<span class="co">-- | Main function chooses between serving static assets</span>
+<span class="co">--   and handling command requests</span>
+main <span class="fu">=</span> quickHttpServe (route routes)
+
+<span class="fu">------------------------------------------------------------------------------</span>
+<span class="co">-- | Handler to extract the command name and argument string</span>
+<span class="co">--   from the request, run it, and respond with the command&#39;s output</span>
+serveCommand okCmds <span class="fu">=</span> <span class="kw">do</span>
+  cmd <span class="ot">&lt;-</span> getParam <span class="st">&quot;cmd&quot;</span>
+  arg <span class="ot">&lt;-</span> maybeToList <span class="fu">&lt;$&gt;</span> getParam <span class="st">&quot;arg&quot;</span>
+  <span class="kw">case</span> cmd <span class="kw">of</span>
+    <span class="dt">Nothing</span> <span class="ot">-&gt;</span> writeBS <span class="st">&quot;No command&quot;</span>
+    <span class="dt">Just</span> c
+      <span class="fu">|</span> c <span class="ot">`notElem`</span> okCmds <span class="ot">-&gt;</span>
+        writeBS (append c <span class="st">&quot; is not an ok command&quot;</span>)
+      <span class="fu">|</span> otherwise <span class="ot">-&gt;</span> <span class="kw">do</span>
+          retString <span class="ot">&lt;-</span> liftIO (readProcess (unpack c) (map unpack arg) <span class="st">&quot;&quot;</span>)
+          writeBS (pack retString)</code></pre></td></tr></table></div>
+<p>This is probably more intimidating than the other code examples we’ve seen, and some of the conventions are different from what we may be used to. But we still haven’t broken past 40 lines of code.</p>
+<p>The first 10 lines are just listing the functions we’re importing from the <a href="http://haskell.org">Haskell</a> web framework <a href="http://snapframework.com">Snap</a>. Lines 13 and 17 are values we’re creating for later use - a list of strings corresponding to the commands on our computer we’ll access, and then a list of <code>routes</code>.</p>
+<p>Each <code>route</code> is a pair of a URL pattern and a handler function to execute if the pattern matches. The <code>route</code> <code>&quot;/:cmd/:arg&quot;</code> will match any URL with the shape <code>http://example.com/something/another</code> - and we pair that pattern with <code>serveCommand cmds</code>, a function we write on lines 29-39. The next route only matches <code>http://example.com/</code>. That request will get routed to a function we imported from <code>Snap</code> for fetching files from the hard drive and sending them back to our client. <code>Snap</code> provides similar functions for allowing access to entire directories - you would do that if your site had more static assets than just a single <code>index.html</code> file.</p>
+<p>The implementation of <code>serveCommand</code> pulls out the part of the URL matching our <code>:cmd</code> in the route pattern and the part matching <code>:arg</code>. We test whether the <code>:cmd</code> part was empty (handling that case on line 33), and if not empty, we check to see that it is in the list of valid commands (line 35). On line 38, we finally pass the command and argument parts to the function <a href="https://hackage.haskell.org/package/process-1.4.1.0/docs/System-Process.html#v:readProcess">readProcess</a>, which calls out to the shell environment to execute whatever command and argument were extracted from the URL<a href="#fn1" class="footnoteRef" id="fnref1"><sup>1</sup></a>.</p>
+<p>We can achieve the same thing with a <a href="https://www.python.org">Python</a> script using the <a href="http://flask.pocoo.org/">Flask</a> framework.</p>
+<div class="sourceCode"><table class="sourceCode python numberLines"><tr class="sourceCode"><td class="lineNumbers"><pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+</pre></td><td class="sourceCode"><pre><code class="sourceCode python"><span class="im">from</span> flask <span class="im">import</span> Flask
+<span class="im">import</span> os
+<span class="im">import</span> subprocess
+app <span class="op">=</span> Flask(<span class="va">__name__</span>)
+
+okCmds <span class="op">=</span> <span class="bu">frozenset</span>([<span class="st">&quot;cowsay&quot;</span>,<span class="st">&quot;doubleit&quot;</span>])
+
+<span class="at">@app.route</span>(<span class="st">&#39;/&lt;cmd&gt;/&lt;arg&gt;&#39;</span>)
+<span class="kw">def</span> runCmd(cmd,arg):
+    <span class="cf">if</span> cmd <span class="op">in</span> okCmds:
+        o <span class="op">=</span> subprocess.check_output([cmd,arg])
+        <span class="cf">return</span> (<span class="st">&#39;&lt;pre&gt;&#39;</span> <span class="op">+</span> o <span class="op">+</span> <span class="st">&#39;&lt;/pre&gt;&#39;</span>)
+    <span class="cf">else</span>:
+        <span class="cf">return</span> ( cmd <span class="op">+</span> <span class="st">&#39; is not an ok command.&#39;</span> )
+
+<span class="at">@app.route</span>(<span class="st">&#39;/&#39;</span>)
+<span class="kw">def</span> index():
+  <span class="cf">return</span> <span class="st">&quot;Hi&quot;</span>
+
+<span class="cf">if</span> <span class="va">__name__</span> <span class="op">==</span> <span class="st">&quot;__main__&quot;</span>:
+    app.run(host<span class="op">=</span><span class="st">&quot;0.0.0.0&quot;</span>, port<span class="op">=</span><span class="dv">8000</span>)</code></pre></td></tr></table></div>
+<p>Flask provides a similar set of tools for taking a request, breaking it into parts, matching on the URL, and returning a response. This code has the advantage that we can run it in Python without needing to run a compiler. That can make it easier to get started and to experiment. The disadvantage is that there is no compiler to check the code; and Python’s increased flexibility means that it’s easier to stretch into postures that are bugs. Writing the above Python server was fun, but nearly every line contained a bug that I didn’t catch until running the program. When programs get bigger (as our server will when we graduate from <code>cowsay</code> to ReactionMechanismGenerator, we will see just how many places for bugs to shelter and enjoy the warmth emanating from our server machine).</p>
+<p>We run the server code the same way we run any program. In the compiled Haskell case[^1], we run our generated executable <code>shell-base-server</code>, optionally passing the aragument <code>-p 80</code>. This argument specifies the port for the server to connect to. When debugging, we often default to port 8000. Port 80 will expose your program to the public internet. You will have to start the program as <code>sudo</code> to access port 80. To run the Python server, pass the code to the Python interpreter: <code>python server.py</code>; the port selection in this case is made in the script.</p>
+<p>Next time, we will talk about picking a server for the specific needs of a given project, and get to work building it out to those specs.</p>
+<div class="footnotes">
+<hr />
+<ol>
+<li id="fn1"><p>The instances of <a href="http://hackage.haskell.org/package/bytestring-0.9.2.1/docs/Data-ByteString.html#v:pack">pack</a> and <a href="http://hackage.haskell.org/package/bytestring-0.9.2.1/docs/Data-ByteString.html#v:unpack">unpack</a> are transforming between different representations of text strings available in <code>Haskell</code>. <a href="https://hackage.haskell.org/package/transformers-0.4.2.0/docs/Control-Monad-IO-Class.html#v:liftIO">liftIO</a> allows arbitrary IO actions to be embedded into the <code>Snap</code> monad. Making sense of these things requires studying <a href="http://haskell.org">Haskell</a> the language and the <a href="http://snapframework.com">Snap Framework</a>, which each have great online documentation and communities.<a href="#fnref1">↩</a></p></li>
+</ol>
+</div>
+]]></description>
+    <pubDate>Tue, 12 Jan 2016 00:00:00 UT</pubDate>
+    <guid>http://example.com/posts/2016-01-12-opening-up-your-research-day-2.html</guid>
+    <dc:creator>Replace me</dc:creator>
+</item>
+<item>
     <title>Opening your research up to the web - Day 1</title>
     <link>http://example.com/posts/2016-01-11-opening-up-your-research-day-1.html</link>
     <description><![CDATA[<div class="info">
