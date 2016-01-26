@@ -2,15 +2,15 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"
     xmlns:dc="http://purl.org/dc/elements/1.1/">
     <channel>
-        <title>TODO: Hakyll Base Feed</title>
-        <link>http://example.com</link>
-        <description><![CDATA[Replace me]]></description>
-        <atom:link href="http://example.com/rss.xml" rel="self"
+        <title>CBMM @ GitHub</title>
+        <link>https://cbmm.github.io</link>
+        <description><![CDATA[The open-source going ons of CBMM]]></description>
+        <atom:link href="https://cbmm.github.io/rss.xml" rel="self"
                    type="application/rss+xml" />
         <lastBuildDate>Wed, 13 Jan 2016 00:00:00 UT</lastBuildDate>
         <item>
     <title>Opening your research up to the web - Day 3</title>
-    <link>http://example.com/posts/2016-01-13-opening-up-your-research-day-3.html</link>
+    <link>https://cbmm.github.io/posts/2016-01-13-opening-up-your-research-day-3.html</link>
     <description><![CDATA[<div class="info">
     Posted on January 13, 2016
     
@@ -89,12 +89,12 @@
 <p>At this point, you may be looking at three unfamiliar programming languages and a handful of new concepts. It would be very unusual for someone to be able to put these things into use after a single reads though. Developing web sites takes a lot of practice. Keep reading, <a href="http://google.com">google</a> liberally, <a href="http://github.com/cbmm/cbmm.github.io/issues">open an issue</a> if you find something confusing (or wrong!). You can do it! Next time we will discuss a little about making pages look nice.</p>
 ]]></description>
     <pubDate>Wed, 13 Jan 2016 00:00:00 UT</pubDate>
-    <guid>http://example.com/posts/2016-01-13-opening-up-your-research-day-3.html</guid>
-    <dc:creator>Replace me</dc:creator>
+    <guid>https://cbmm.github.io/posts/2016-01-13-opening-up-your-research-day-3.html</guid>
+    <dc:creator>Greg Hale</dc:creator>
 </item>
 <item>
     <title>Opening your research up to the web - Day 2</title>
-    <link>http://example.com/posts/2016-01-12-opening-up-your-research-day-2.html</link>
+    <link>https://cbmm.github.io/posts/2016-01-12-opening-up-your-research-day-2.html</link>
     <description><![CDATA[<div class="info">
     Posted on January 12, 2016
     
@@ -111,7 +111,9 @@
 <p>Useful as it is, installing the dependencies has apparently been hard enough to limit adoption, so we want to expose some of its functionality through a web interface. Just what I had in mind for our class! We’ll dedicate our three remaining sessions to this, hope that it benefits the Reaction Mechanism Generator project, and then see if the skills we learn spill over into other projects.</p>
 <h1 id="servers">Servers</h1>
 <p>On <a href="/posts/2016-01-11-opening-up-your-research-day-1.html">Day 1</a> we talked about static assets like <code>.html</code> files, <code>.css</code> files, <code>.js</code> scripts, and images. When the all we need to do is deliver these files to a user, we don’t have to handle writing any code to serve the files; we can just find a static hosting services like <a href="https://pages.github.com">GitHub Pages</a> or <a href="https://aws.amazon.com/s3">Amazon S3</a>.</p>
-<p>But that was a whole day ago, and today we want more. We need to be able to let the user specify a computation to run - like some set of reactants and environmental conditions - and we want to run the computation and return them a set of results. The files we’d want to serve back don’t exist yet - they are the output of the simulator, so our server needs to be a little more customized.</p>
+<p>But that was a whole day ago, and today we want more.</p>
+<!--more-->
+<p>We need to be able to let the user specify a computation to run - like some set of reactants and environmental conditions - and we want to run the computation and return them a set of results. The files we’d want to serve back don’t exist yet - they are the output of the simulator, so our server needs to be a little more customized.</p>
 <p>Fortunately for us, writing backend code is fun. We get to choose any language we like as long as it has a library for serving HTTP traffic. And we get to learn a little bit about <a href="http://www.tutorialspoint.com/http/http_requests">HTTP</a> and <a href="https://en.wikipedia.org/wiki/Query_string">URLs</a>.</p>
 <h1 id="warm-up">Warm-up</h1>
 <p>We’ll start with a miniaturized version of our final project goal. For some small set of programs already available on our computer, let’s write a server that calls those programs, passes them some data, and returns their result. For example, <code>cowsay</code> and <code>doubleit</code>.</p>
@@ -287,12 +289,12 @@ okCmds <span class="op">=</span> <span class="bu">frozenset</span>([<span class=
 </div>
 ]]></description>
     <pubDate>Tue, 12 Jan 2016 00:00:00 UT</pubDate>
-    <guid>http://example.com/posts/2016-01-12-opening-up-your-research-day-2.html</guid>
-    <dc:creator>Replace me</dc:creator>
+    <guid>https://cbmm.github.io/posts/2016-01-12-opening-up-your-research-day-2.html</guid>
+    <dc:creator>Greg Hale</dc:creator>
 </item>
 <item>
     <title>Opening your research up to the web - Day 1</title>
-    <link>http://example.com/posts/2016-01-11-opening-up-your-research-day-1.html</link>
+    <link>https://cbmm.github.io/posts/2016-01-11-opening-up-your-research-day-1.html</link>
     <description><![CDATA[<div class="info">
     Posted on January 11, 2016
     
@@ -435,12 +437,12 @@ git push origin gh-pages</code></pre>
 <p>I’m really looking forward to diving in and picking something concrete to work on in the next class!</p>
 ]]></description>
     <pubDate>Mon, 11 Jan 2016 00:00:00 UT</pubDate>
-    <guid>http://example.com/posts/2016-01-11-opening-up-your-research-day-1.html</guid>
-    <dc:creator>Replace me</dc:creator>
+    <guid>https://cbmm.github.io/posts/2016-01-11-opening-up-your-research-day-1.html</guid>
+    <dc:creator>Greg Hale</dc:creator>
 </item>
 <item>
     <title>Opening up your research class - Day 0</title>
-    <link>http://example.com/posts/2016-01-11-opening-up-your-research-day-0.html</link>
+    <link>https://cbmm.github.io/posts/2016-01-11-opening-up-your-research-day-0.html</link>
     <description><![CDATA[<div class="info">
     Posted on January 11, 2016
     
@@ -472,12 +474,12 @@ git push origin gh-pages</code></pre>
 <p>Teaching the <a href="/posts/2016-01-08-iap-git-class.html">git introduction</a> showed me just how many micro-steps one has to take before feeling comfortable with basic coding and web technologies - it’s easy to forget that as you become comfortable yourself. In this class we might try to go way beyond just ‘get my project onto GitHub’. There’s some chance that either (a) there is no middle-ground where a researcher can learn enough about web tooling without sacrificing their research time, or (b) I won’t manage to lead the class to that middle-ground. That’s something to keep in mind as we start, and a good goal to keep coming back to.</p>
 ]]></description>
     <pubDate>Mon, 11 Jan 2016 00:00:00 UT</pubDate>
-    <guid>http://example.com/posts/2016-01-11-opening-up-your-research-day-0.html</guid>
-    <dc:creator>Replace me</dc:creator>
+    <guid>https://cbmm.github.io/posts/2016-01-11-opening-up-your-research-day-0.html</guid>
+    <dc:creator>Greg Hale</dc:creator>
 </item>
 <item>
     <title>Teaching Git & Github</title>
-    <link>http://example.com/posts/2016-01-08-iap-git-class.html</link>
+    <link>https://cbmm.github.io/posts/2016-01-08-iap-git-class.html</link>
     <description><![CDATA[<div class="info">
     Posted on January  8, 2016
     
@@ -502,12 +504,12 @@ git push origin gh-pages</code></pre>
 <p>There are lots of online guides to git, particularly good ones are <a href="https://try.github.io/levels/1/challenges/1">try.github.io</a> and <a href="https://git-scm.com/doc">git-scm.com</a>.</p>
 ]]></description>
     <pubDate>Fri, 08 Jan 2016 00:00:00 UT</pubDate>
-    <guid>http://example.com/posts/2016-01-08-iap-git-class.html</guid>
-    <dc:creator>Replace me</dc:creator>
+    <guid>https://cbmm.github.io/posts/2016-01-08-iap-git-class.html</guid>
+    <dc:creator>Greg Hale</dc:creator>
 </item>
 <item>
     <title>Hakyll setup</title>
-    <link>http://example.com/posts/2016-01-07-hakyll-setup.html</link>
+    <link>https://cbmm.github.io/posts/2016-01-07-hakyll-setup.html</link>
     <description><![CDATA[<div class="info">
     Posted on January  7, 2016
     
@@ -549,8 +551,8 @@ git push origin gh-pages</code></pre>
 </div>
 ]]></description>
     <pubDate>Thu, 07 Jan 2016 00:00:00 UT</pubDate>
-    <guid>http://example.com/posts/2016-01-07-hakyll-setup.html</guid>
-    <dc:creator>Replace me</dc:creator>
+    <guid>https://cbmm.github.io/posts/2016-01-07-hakyll-setup.html</guid>
+    <dc:creator>Greg Hale</dc:creator>
 </item>
 
     </channel>

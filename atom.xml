@@ -1,18 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
-    <title>TODO: Hakyll Base Feed</title>
-    <link href="http://example.com/atom.xml" rel="self" />
-    <link href="http://example.com" />
-    <id>http://example.com/atom.xml</id>
+    <title>CBMM @ GitHub</title>
+    <link href="https://cbmm.github.io/atom.xml" rel="self" />
+    <link href="https://cbmm.github.io" />
+    <id>https://cbmm.github.io/atom.xml</id>
     <author>
-        <name>Replace me</name>
-        <email></email>
+        <name>Greg Hale</name>
+        <email>imalsogreg@gmail.com</email>
     </author>
     <updated>2016-01-13T00:00:00Z</updated>
     <entry>
     <title>Opening your research up to the web - Day 3</title>
-    <link href="http://example.com/posts/2016-01-13-opening-up-your-research-day-3.html" />
-    <id>http://example.com/posts/2016-01-13-opening-up-your-research-day-3.html</id>
+    <link href="https://cbmm.github.io/posts/2016-01-13-opening-up-your-research-day-3.html" />
+    <id>https://cbmm.github.io/posts/2016-01-13-opening-up-your-research-day-3.html</id>
     <published>2016-01-13T00:00:00Z</published>
     <updated>2016-01-13T00:00:00Z</updated>
     <summary type="html"><![CDATA[<div class="info">
@@ -95,8 +95,8 @@
 </entry>
 <entry>
     <title>Opening your research up to the web - Day 2</title>
-    <link href="http://example.com/posts/2016-01-12-opening-up-your-research-day-2.html" />
-    <id>http://example.com/posts/2016-01-12-opening-up-your-research-day-2.html</id>
+    <link href="https://cbmm.github.io/posts/2016-01-12-opening-up-your-research-day-2.html" />
+    <id>https://cbmm.github.io/posts/2016-01-12-opening-up-your-research-day-2.html</id>
     <published>2016-01-12T00:00:00Z</published>
     <updated>2016-01-12T00:00:00Z</updated>
     <summary type="html"><![CDATA[<div class="info">
@@ -115,7 +115,9 @@
 <p>Useful as it is, installing the dependencies has apparently been hard enough to limit adoption, so we want to expose some of its functionality through a web interface. Just what I had in mind for our class! We’ll dedicate our three remaining sessions to this, hope that it benefits the Reaction Mechanism Generator project, and then see if the skills we learn spill over into other projects.</p>
 <h1 id="servers">Servers</h1>
 <p>On <a href="/posts/2016-01-11-opening-up-your-research-day-1.html">Day 1</a> we talked about static assets like <code>.html</code> files, <code>.css</code> files, <code>.js</code> scripts, and images. When the all we need to do is deliver these files to a user, we don’t have to handle writing any code to serve the files; we can just find a static hosting services like <a href="https://pages.github.com">GitHub Pages</a> or <a href="https://aws.amazon.com/s3">Amazon S3</a>.</p>
-<p>But that was a whole day ago, and today we want more. We need to be able to let the user specify a computation to run - like some set of reactants and environmental conditions - and we want to run the computation and return them a set of results. The files we’d want to serve back don’t exist yet - they are the output of the simulator, so our server needs to be a little more customized.</p>
+<p>But that was a whole day ago, and today we want more.</p>
+<!--more-->
+<p>We need to be able to let the user specify a computation to run - like some set of reactants and environmental conditions - and we want to run the computation and return them a set of results. The files we’d want to serve back don’t exist yet - they are the output of the simulator, so our server needs to be a little more customized.</p>
 <p>Fortunately for us, writing backend code is fun. We get to choose any language we like as long as it has a library for serving HTTP traffic. And we get to learn a little bit about <a href="http://www.tutorialspoint.com/http/http_requests">HTTP</a> and <a href="https://en.wikipedia.org/wiki/Query_string">URLs</a>.</p>
 <h1 id="warm-up">Warm-up</h1>
 <p>We’ll start with a miniaturized version of our final project goal. For some small set of programs already available on our computer, let’s write a server that calls those programs, passes them some data, and returns their result. For example, <code>cowsay</code> and <code>doubleit</code>.</p>
@@ -293,8 +295,8 @@ okCmds <span class="op">=</span> <span class="bu">frozenset</span>([<span class=
 </entry>
 <entry>
     <title>Opening your research up to the web - Day 1</title>
-    <link href="http://example.com/posts/2016-01-11-opening-up-your-research-day-1.html" />
-    <id>http://example.com/posts/2016-01-11-opening-up-your-research-day-1.html</id>
+    <link href="https://cbmm.github.io/posts/2016-01-11-opening-up-your-research-day-1.html" />
+    <id>https://cbmm.github.io/posts/2016-01-11-opening-up-your-research-day-1.html</id>
     <published>2016-01-11T00:00:00Z</published>
     <updated>2016-01-11T00:00:00Z</updated>
     <summary type="html"><![CDATA[<div class="info">
@@ -441,8 +443,8 @@ git push origin gh-pages</code></pre>
 </entry>
 <entry>
     <title>Opening up your research class - Day 0</title>
-    <link href="http://example.com/posts/2016-01-11-opening-up-your-research-day-0.html" />
-    <id>http://example.com/posts/2016-01-11-opening-up-your-research-day-0.html</id>
+    <link href="https://cbmm.github.io/posts/2016-01-11-opening-up-your-research-day-0.html" />
+    <id>https://cbmm.github.io/posts/2016-01-11-opening-up-your-research-day-0.html</id>
     <published>2016-01-11T00:00:00Z</published>
     <updated>2016-01-11T00:00:00Z</updated>
     <summary type="html"><![CDATA[<div class="info">
@@ -478,8 +480,8 @@ git push origin gh-pages</code></pre>
 </entry>
 <entry>
     <title>Teaching Git & Github</title>
-    <link href="http://example.com/posts/2016-01-08-iap-git-class.html" />
-    <id>http://example.com/posts/2016-01-08-iap-git-class.html</id>
+    <link href="https://cbmm.github.io/posts/2016-01-08-iap-git-class.html" />
+    <id>https://cbmm.github.io/posts/2016-01-08-iap-git-class.html</id>
     <published>2016-01-08T00:00:00Z</published>
     <updated>2016-01-08T00:00:00Z</updated>
     <summary type="html"><![CDATA[<div class="info">
@@ -508,8 +510,8 @@ git push origin gh-pages</code></pre>
 </entry>
 <entry>
     <title>Hakyll setup</title>
-    <link href="http://example.com/posts/2016-01-07-hakyll-setup.html" />
-    <id>http://example.com/posts/2016-01-07-hakyll-setup.html</id>
+    <link href="https://cbmm.github.io/posts/2016-01-07-hakyll-setup.html" />
+    <id>https://cbmm.github.io/posts/2016-01-07-hakyll-setup.html</id>
     <published>2016-01-07T00:00:00Z</published>
     <updated>2016-01-07T00:00:00Z</updated>
     <summary type="html"><![CDATA[<div class="info">
