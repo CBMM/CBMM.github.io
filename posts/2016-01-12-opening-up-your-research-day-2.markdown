@@ -20,6 +20,9 @@ On [Day 1](/posts/2016-01-11-opening-up-your-research-day-1.html) we talked abou
 When the all we need to do is deliver these files to a user, we don't have to handle writing any code to serve the files; we can just find a static hosting services like [GitHub Pages](https://pages.github.com) or [Amazon S3](https://aws.amazon.com/s3).
 
 But that was a whole day ago, and today we want more.
+
+<!--more-->
+
 We need to be able to let the user specify a computation to run - like some set of reactants and environmental conditions - and we want to run the computation and return them a set of results.
 The files we'd want to serve back don't exist yet - they are the output of the simulator, so our server needs to be a little more customized.
 
