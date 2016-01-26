@@ -1,110 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
-<feed xmlns="http://www.w3.org/2005/Atom">
-    <title>CBMM @ GitHub</title>
-    <link href="https://cbmm.github.io/atom.xml" rel="self" />
-    <link href="https://cbmm.github.io" />
-    <id>https://cbmm.github.io/atom.xml</id>
-    <author>
-        <name>Greg Hale</name>
-        <email>imalsogreg@gmail.com</email>
-    </author>
-<<<<<<< HEAD
-    <updated>2016-01-13T00:00:00Z</updated>
-    <entry>
-    <title>Opening your research up to the web - Day 3</title>
-    <link href="https://cbmm.github.io/posts/2016-01-13-opening-up-your-research-day-3.html" />
-    <id>https://cbmm.github.io/posts/2016-01-13-opening-up-your-research-day-3.html</id>
-    <published>2016-01-13T00:00:00Z</published>
-    <updated>2016-01-13T00:00:00Z</updated>
-    <summary type="html"><![CDATA[<div class="info">
-    Posted on January 13, 2016
-    
-        by Greg Hale
-    
-</div>
-<div class="info">
-    
-    Tags: <a href="/tags/open%20science.html">open science</a>, <a href="/tags/teaching.html">teaching</a>, <a href="/tags/snap.html">snap</a>, <a href="/tags/flask.html">flask</a>
-    
-</div>
-
-<p>In our <a href="posts/2016-01-12-opening-up-your-research-day-2.html">last lecture</a> we set up a server to call one of several shell commands depending the URL. I wouldn’t recommend just rereading those posts in order to start web programming - instead you should refer to the very good documentation released with a web framework like <a href="http://snapframework.com">Snap</a> or <a href="http://flask.pocoo.org">Flask</a>. When you get some familiarity with the languages used (<a href="http://haskell.org">Haskell</a> and <a href="https://www.python.org">Python</a> respectively), then the details in our code samples will begin to make more sense.</p>
-<h1 id="direct-library-calls-vs.shell-commands">Direct library calls vs. shell commands</h1>
-<p>The servers we built were language agnostic. They can call any program you have installed on your system, passing arguments through the command line. Sometimes we can trade away language agnosticism for convenience and code quality. For example, if the scientific application is written in Python, and our server is written in Python, then instead of using a <code>process</code> library to call out to the shell, we can invoke our scientific function directly from the Flask handler.</p>
-<!--more-->
-<div class="sourceCode"><pre class="sourceCode python"><code class="sourceCode python"><span class="im">from</span> flask <span class="im">import</span> <span class="op">*</span>
-<span class="im">from</span> reactiongeneratormachine <span class="im">import</span> runReaction
-
-<span class="at">@app.route</span>(<span class="st">&#39;/&lt;reactants&gt;&#39;</span>)
-<span class="kw">def</span> handleReactants(reactants):
-
-    r <span class="op">=</span> json.loads(reactants)
-    <span class="cf">if</span> validate(r):
-        products  <span class="op">=</span> runReaction(r)
-        <span class="cf">return</span> jsonify(products)
-
-<span class="cf">if</span> <span class="va">__name__</span> <span class="op">==</span> <span class="st">&quot;__main__&quot;</span>:
-    app.run(host<span class="op">=</span><span class="st">&quot;0.0.0.0&quot;</span>, port<span class="op">=</span><span class="dv">80</span>)</code></pre></div>
-<p>Calling the function directly has a couple of advantages. First, if your library needs to keep some kind of configuration or state around, you can manage these things in Flask (or let the user configure the application through more URL parameters, a la <code>https://reactions.io/runReaction?q=Methane+Hydrogen&amp;temperature=285</code> and with <code>request.get.args('temperature')</code> in the handler)</p>
-<p>More importantly, calling a function directly for your handler removes the need to turn the request data into a string for the parameter to a call to the shell. In languages like Haskell where types provide huge amounts of structure to your data, this can be a strong advantage. In Python too, converting your data between wire formats appropriate for HTTP and a shell call can be tedious and error-prone, and Python’s type system will do little to help you keep all those representations in sync, and you will find that corrupted data and server crashes become more frequent and difficult to fix as both your server and your scientific code become more complex.</p>
-<h1 id="synchronous-and-asynchronous-request-handling">Synchronous and asynchronous request handling</h1>
-<p>Whether we are calling a shell command or a library function to process some data, what happens when multiple people simultaneously request some work do be done? Let’s look at a handler we used above:</p>
-<div class="sourceCode"><pre class="sourceCode python"><code class="sourceCode python"><span class="at">@app.route</span>(<span class="st">&#39;/&lt;reactants&gt;&#39;</span>)
-<span class="kw">def</span> handleReactants(reactants):
-
-    reactants <span class="op">=</span> json.loads(reactants)
-    <span class="cf">if</span> validate(reactants):
-        products  <span class="op">=</span> runReaction(reactants)
-        <span class="cf">return</span> jsonify(products)</code></pre></div>
-<p>Our function starts executing when given a <code>reactants</code> parameter by the underlying web framework. The parameter is parsed into a JSON value, validated, and sent along to <code>runReaction()</code>, which takes (let’s say) two seconds to run. When <code>runReaction()</code> returns, we serialize the result and send it back to the browser. The call to <code>runReaction()</code> is ‘synchronous’: it takes a bite from the same time budget as everything else in the handler, and we can’t move forward until it is finished running. Furthermore, if Flask itself dispatches requests to handlers synchronously, then a second user issuing a request will have to wait for processing of the first user’s request to finish before getting a turn. What’s worse, synchronous request handling would block <em>all</em> subsequent request handling, so user two wouldn’t even get to see a web page or a ‘Please wait for User 1’ message while they wait - it would look to them as though the server were down until User 1’s request is done being processed. This is of course not Ok for a webserver, and we can tell Flask to handle routes asynchronously in the call to <code>app.run()</code></p>
-<div class="sourceCode"><pre class="sourceCode python"><code class="sourceCode python"><span class="cf">if</span> <span class="va">__name__</span> <span class="op">==</span> <span class="st">&quot;__main__&quot;</span>:
-    app.run(host<span class="op">=</span><span class="st">&quot;0.0.0.0&quot;</span>, port<span class="op">=</span><span class="dv">80</span>, threaded<span class="op">=</span><span class="va">True</span>)</code></pre></div>
-<p>In our <code>Snap</code> server, request handling is threaded by default. But if we make a synchronous function call in a handler, that handler still will not return until the synchronous call finishes.</p>
-<h1 id="asynchronous-calls">Asynchronous calls</h1>
-<p>What could we do if we want to let a response come back to the user, without making their browser sit in what appears to be a inactive ‘loading’ state? Well, we would need to return <em>something</em> to the user other than the results of <code>runReaction()</code>, because <code>runReaction()</code> can’t possibly run in less than two seconds (the problem is of course much worse for really long-running computation). It turns out that the easiest way to solve our problem is to let the server stay busy during the computation (don’t return immediately), but decouple that that waiting from the loading of a page. Well, that’s vague! Let’s see some code:</p>
-<h3 id="index.html">index.html</h3>
-<div class="sourceCode"><pre class="sourceCode html"><code class="sourceCode html"><span class="kw">&lt;html&gt;</span>
-  <span class="kw">&lt;head&gt;</span>
-    <span class="kw">&lt;script</span><span class="ot"> src=</span><span class="st">&quot;http://code.jquery.com/jquery-2.2.0.js&quot;</span><span class="kw">&gt;</span>
-    <span class="kw">&lt;/script&gt;</span>
-    <span class="kw">&lt;script</span><span class="ot"> src=</span><span class="st">&quot;run.js&quot;</span><span class="kw">&gt;&lt;/script&gt;</span>
-  <span class="kw">&lt;/head&gt;</span>
-  <span class="kw">&lt;body&gt;</span>
-    <span class="kw">&lt;h1&gt;</span>Example<span class="kw">&lt;/h1&gt;</span>
-    <span class="kw">&lt;input</span><span class="ot"> type=</span><span class="st">&quot;text&quot;</span><span class="ot"> placeholder=</span><span class="st">&quot;Methane&quot;</span> 
-<span class="ot">           id=</span><span class="st">&quot;reactant-text&quot;</span><span class="kw">&gt;&lt;/input&gt;</span>
-    <span class="kw">&lt;button</span><span class="ot"> onclick=</span><span class="st">&quot;run_job();&quot;</span><span class="kw">&gt;</span>Run Job<span class="kw">&lt;/button&gt;</span>
-  <span class="kw">&lt;/body&gt;</span>
-<span class="kw">&lt;/html&gt;</span></code></pre></div>
-<h3 id="run.js">run.js</h3>
-<div class="sourceCode"><pre class="sourceCode javascript"><code class="sourceCode javascript"><span class="kw">function</span> <span class="at">run_job</span>()<span class="op">{</span>
-    <span class="kw">var</span> inParam <span class="op">=</span> <span class="at">$</span>(<span class="st">&#39;#reactant-text&#39;</span>)[<span class="dv">0</span>]<span class="op">;</span>
-    <span class="va">$</span>.<span class="at">ajax</span>(<span class="st">&#39;/runReaction/&#39;</span> <span class="op">+</span> <span class="va">inParam</span>.<span class="at">value</span><span class="op">,</span>
-           <span class="op">{</span><span class="st">&#39;success&#39;</span><span class="op">:</span> <span class="kw">function</span> (d) <span class="op">{</span>
-               <span class="at">$</span>(<span class="st">&#39;body&#39;</span>).<span class="at">append</span>(d)<span class="op">;</span>
-             <span class="op">},</span>
-            <span class="st">&#39;failure&#39;</span><span class="op">:</span> <span class="kw">function</span> (e) <span class="op">{</span> 
-              <span class="at">$</span>(<span class="st">&#39;body&#39;</span>).<span class="at">append</span>(<span class="st">&#39;Error: &#39;</span> <span class="op">+</span> e)<span class="op">;</span>
-             <span class="op">}</span>
-           <span class="op">}</span>)<span class="op">;</span>
-<span class="op">};</span></code></pre></div>
-<p>There are several new things going on here. To answer our earlier question “What do we return to the user if not the results of ‘runReaction()’?” - we’re going to just return this <code>html</code> page. The page links to the <a href="http://jquery.com">jQuery</a> library and to a script called <code>run.js</code> that we will write. The user doesn’t type any data-processing URL, instead we give the user a button that we link to a javascript function called <code>run_job()</code>.</p>
-<p>When the <code>run_job()</code> function runs (still in the browser), we first get the text value of our <code>reactant-text</code> input field (from index.html). Then we see a call to <a href="http://api.jquery.com/jquery.ajax/">$.axax()</a>. The <code>$</code> is a short name for the <code>jQuery</code> object, which provides the <code>ajax</code> function. <code>ajax</code> stands for “Asynchronous javascript and XML”. The gist of an ajax call is that it visits some URL (the first argument to <code>$.ajax()</code>), and then calls either the <code>success</code> or <code>failure</code> callbacks that you pass, depending on how things go on the server.</p>
-<p>Importantly, calls to <code>$.ajax()</code> are <em>asynchronous</em>. The ajax job runs in one of the browser’s background threads. The UI in the browser remains responsive, and the server remains responsive too, as long as it handles separate requests in separate threads. The only blocking bit is the one server thread processing our request, and this works out very well for us! The server only returns an answer when it has one, at which point the <code>success</code> callback handles it and updates the page according to how you want to display the result (here we just print the text of the result). You can see the <a href="https://www.youtube.com/watch?v=42PEVGVJVgk">results</a> and <a href="https://gist.github.com/imalsogreg/dfa352b454c68693f28b">code</a> for a more thorough worked example.</p>
-<p>At this point, you may be looking at three unfamiliar programming languages and a handful of new concepts. It would be very unusual for someone to be able to put these things into use after a single reads though. Developing web sites takes a lot of practice. Keep reading, <a href="http://google.com">google</a> liberally, <a href="http://github.com/cbmm/cbmm.github.io/issues">open an issue</a> if you find something confusing (or wrong!). You can do it! Next time we will discuss a little about making pages look nice.</p>
-]]></summary>
-</entry>
-<entry>
-=======
-    <updated>2016-01-12T00:00:00Z</updated>
-    <entry>
->>>>>>> 2771f499e0c3e5bb50aafbd006764b7ba0822f17
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"
+    xmlns:dc="http://purl.org/dc/elements/1.1/">
+    <channel>
+        <title>CBMM @ GitHub</title>
+        <link>https://cbmm.github.io</link>
+        <description><![CDATA[The open-source going ons of CBMM]]></description>
+        <atom:link href="https://cbmm.github.io/rss.xml" rel="self"
+                   type="application/rss+xml" />
+        <lastBuildDate>Tue, 12 Jan 2016 00:00:00 UT</lastBuildDate>
+        <item>
     <title>Opening your research up to the web - Day 2</title>
-    <link href="https://cbmm.github.io/posts/2016-01-12-opening-up-your-research-day-2.html" />
-    <id>https://cbmm.github.io/posts/2016-01-12-opening-up-your-research-day-2.html</id>
-    <published>2016-01-12T00:00:00Z</published>
-    <updated>2016-01-12T00:00:00Z</updated>
-    <summary type="html"><![CDATA[<div class="info">
+    <link>https://cbmm.github.io/posts/2016-01-12-opening-up-your-research-day-2.html</link>
+    <description><![CDATA[<div class="info">
     Posted on January 12, 2016
     
         by Greg Hale
@@ -120,13 +27,7 @@
 <p>Useful as it is, installing the dependencies has apparently been hard enough to limit adoption, so we want to expose some of its functionality through a web interface. Just what I had in mind for our class! We’ll dedicate our three remaining sessions to this, hope that it benefits the Reaction Mechanism Generator project, and then see if the skills we learn spill over into other projects.</p>
 <h1 id="servers">Servers</h1>
 <p>On <a href="/posts/2016-01-11-opening-up-your-research-day-1.html">Day 1</a> we talked about static assets like <code>.html</code> files, <code>.css</code> files, <code>.js</code> scripts, and images. When the all we need to do is deliver these files to a user, we don’t have to handle writing any code to serve the files; we can just find a static hosting services like <a href="https://pages.github.com">GitHub Pages</a> or <a href="https://aws.amazon.com/s3">Amazon S3</a>.</p>
-<<<<<<< HEAD
-<p>But that was a whole day ago, and today we want more.</p>
-<!--more-->
-<p>We need to be able to let the user specify a computation to run - like some set of reactants and environmental conditions - and we want to run the computation and return them a set of results. The files we’d want to serve back don’t exist yet - they are the output of the simulator, so our server needs to be a little more customized.</p>
-=======
 <p>But that was a whole day ago, and today we want more. We need to be able to let the user specify a computation to run - like some set of reactants and environmental conditions - and we want to run the computation and return them a set of results. The files we’d want to serve back don’t exist yet - they are the output of the simulator, so our server needs to be a little more customized.</p>
->>>>>>> 2771f499e0c3e5bb50aafbd006764b7ba0822f17
 <p>Fortunately for us, writing backend code is fun. We get to choose any language we like as long as it has a library for serving HTTP traffic. And we get to learn a little bit about <a href="http://www.tutorialspoint.com/http/http_requests">HTTP</a> and <a href="https://en.wikipedia.org/wiki/Query_string">URLs</a>.</p>
 <h1 id="warm-up">Warm-up</h1>
 <p>We’ll start with a miniaturized version of our final project goal. For some small set of programs already available on our computer, let’s write a server that calls those programs, passes them some data, and returns their result. For example, <code>cowsay</code> and <code>doubleit</code>.</p>
@@ -300,15 +201,15 @@ okCmds <span class="op">=</span> <span class="bu">frozenset</span>([<span class=
 <li id="fn1"><p>The instances of <a href="http://hackage.haskell.org/package/bytestring-0.9.2.1/docs/Data-ByteString.html#v:pack">pack</a> and <a href="http://hackage.haskell.org/package/bytestring-0.9.2.1/docs/Data-ByteString.html#v:unpack">unpack</a> are transforming between different representations of text strings available in <code>Haskell</code>. <a href="https://hackage.haskell.org/package/transformers-0.4.2.0/docs/Control-Monad-IO-Class.html#v:liftIO">liftIO</a> allows arbitrary IO actions to be embedded into the <code>Snap</code> monad. Making sense of these things requires studying <a href="http://haskell.org">Haskell</a> the language and the <a href="http://snapframework.com">Snap Framework</a>, which each have great online documentation and communities.<a href="#fnref1">↩</a></p></li>
 </ol>
 </div>
-]]></summary>
-</entry>
-<entry>
+]]></description>
+    <pubDate>Tue, 12 Jan 2016 00:00:00 UT</pubDate>
+    <guid>https://cbmm.github.io/posts/2016-01-12-opening-up-your-research-day-2.html</guid>
+    <dc:creator>Greg Hale</dc:creator>
+</item>
+<item>
     <title>Opening your research up to the web - Day 1</title>
-    <link href="https://cbmm.github.io/posts/2016-01-11-opening-up-your-research-day-1.html" />
-    <id>https://cbmm.github.io/posts/2016-01-11-opening-up-your-research-day-1.html</id>
-    <published>2016-01-11T00:00:00Z</published>
-    <updated>2016-01-11T00:00:00Z</updated>
-    <summary type="html"><![CDATA[<div class="info">
+    <link>https://cbmm.github.io/posts/2016-01-11-opening-up-your-research-day-1.html</link>
+    <description><![CDATA[<div class="info">
     Posted on January 11, 2016
     
         by Greg Hale
@@ -448,15 +349,15 @@ git push origin gh-pages</code></pre>
 <li>Cancer therapy crowd-source game</li>
 </ul>
 <p>I’m really looking forward to diving in and picking something concrete to work on in the next class!</p>
-]]></summary>
-</entry>
-<entry>
+]]></description>
+    <pubDate>Mon, 11 Jan 2016 00:00:00 UT</pubDate>
+    <guid>https://cbmm.github.io/posts/2016-01-11-opening-up-your-research-day-1.html</guid>
+    <dc:creator>Greg Hale</dc:creator>
+</item>
+<item>
     <title>Opening up your research class - Day 0</title>
-    <link href="https://cbmm.github.io/posts/2016-01-11-opening-up-your-research-day-0.html" />
-    <id>https://cbmm.github.io/posts/2016-01-11-opening-up-your-research-day-0.html</id>
-    <published>2016-01-11T00:00:00Z</published>
-    <updated>2016-01-11T00:00:00Z</updated>
-    <summary type="html"><![CDATA[<div class="info">
+    <link>https://cbmm.github.io/posts/2016-01-11-opening-up-your-research-day-0.html</link>
+    <description><![CDATA[<div class="info">
     Posted on January 11, 2016
     
         by Greg Hale
@@ -485,15 +386,15 @@ git push origin gh-pages</code></pre>
 <h1 id="predictions">Predictions</h1>
 <!--more-->
 <p>Teaching the <a href="/posts/2016-01-08-iap-git-class.html">git introduction</a> showed me just how many micro-steps one has to take before feeling comfortable with basic coding and web technologies - it’s easy to forget that as you become comfortable yourself. In this class we might try to go way beyond just ‘get my project onto GitHub’. There’s some chance that either (a) there is no middle-ground where a researcher can learn enough about web tooling without sacrificing their research time, or (b) I won’t manage to lead the class to that middle-ground. That’s something to keep in mind as we start, and a good goal to keep coming back to.</p>
-]]></summary>
-</entry>
-<entry>
+]]></description>
+    <pubDate>Mon, 11 Jan 2016 00:00:00 UT</pubDate>
+    <guid>https://cbmm.github.io/posts/2016-01-11-opening-up-your-research-day-0.html</guid>
+    <dc:creator>Greg Hale</dc:creator>
+</item>
+<item>
     <title>Teaching Git & Github</title>
-    <link href="https://cbmm.github.io/posts/2016-01-08-iap-git-class.html" />
-    <id>https://cbmm.github.io/posts/2016-01-08-iap-git-class.html</id>
-    <published>2016-01-08T00:00:00Z</published>
-    <updated>2016-01-08T00:00:00Z</updated>
-    <summary type="html"><![CDATA[<div class="info">
+    <link>https://cbmm.github.io/posts/2016-01-08-iap-git-class.html</link>
+    <description><![CDATA[<div class="info">
     Posted on January  8, 2016
     
         by Greg Hale
@@ -515,15 +416,15 @@ git push origin gh-pages</code></pre>
 <p>Students forked this repository to their own GitHub accounts (perhaps one still exists <a href="https://github.com/yunboyer/gitdemo">here</a>?), and each cloned the repository to their laptop, made a change, pushed their work back to github, and then issued pull requests to me. I integrated each pull request back into the original <code>gitdemo</code> repository in turn. Sometimes the merges were successful. Other times, one student’s work being integrated into the central repository would conflict with the merge of a later student’s work, so we got to see how merge conflicts are resolved.</p>
 <p>It takes a lot more than a couple of hours to get used to version control, learning the jargon, and grasping which aspects of git are mandatory and which are just parts of workflow convention. But I think the students all came away with a very solid grasp of the basics and how to move forward. All in all, for git I really like the interactive format.</p>
 <p>There are lots of online guides to git, particularly good ones are <a href="https://try.github.io/levels/1/challenges/1">try.github.io</a> and <a href="https://git-scm.com/doc">git-scm.com</a>.</p>
-]]></summary>
-</entry>
-<entry>
+]]></description>
+    <pubDate>Fri, 08 Jan 2016 00:00:00 UT</pubDate>
+    <guid>https://cbmm.github.io/posts/2016-01-08-iap-git-class.html</guid>
+    <dc:creator>Greg Hale</dc:creator>
+</item>
+<item>
     <title>Hakyll setup</title>
-    <link href="https://cbmm.github.io/posts/2016-01-07-hakyll-setup.html" />
-    <id>https://cbmm.github.io/posts/2016-01-07-hakyll-setup.html</id>
-    <published>2016-01-07T00:00:00Z</published>
-    <updated>2016-01-07T00:00:00Z</updated>
-    <summary type="html"><![CDATA[<div class="info">
+    <link>https://cbmm.github.io/posts/2016-01-07-hakyll-setup.html</link>
+    <description><![CDATA[<div class="info">
     Posted on January  7, 2016
     
         by Greg Hale
@@ -562,7 +463,11 @@ git push origin gh-pages</code></pre>
 <li id="fn3"><p><a href="https://philipwalton.github.io/solved-by-flexbox/demos/sticky-footer/" class="uri">https://philipwalton.github.io/solved-by-flexbox/demos/sticky-footer/</a><a href="#fnref3">↩</a></p></li>
 </ol>
 </div>
-]]></summary>
-</entry>
+]]></description>
+    <pubDate>Thu, 07 Jan 2016 00:00:00 UT</pubDate>
+    <guid>https://cbmm.github.io/posts/2016-01-07-hakyll-setup.html</guid>
+    <dc:creator>Greg Hale</dc:creator>
+</item>
 
-</feed>
+    </channel>
+</rss>

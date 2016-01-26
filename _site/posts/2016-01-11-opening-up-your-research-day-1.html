@@ -1,0 +1,219 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>CBMM - Opening your research up to the web - Day 1</title>
+        <link rel="stylesheet" type="text/css" href="http://yui.yahooapis.com/pure/0.6.0/pure-min.css">
+        <link rel="stylesheet" type="text/css" href="../css/default.css" />
+        <link rel="stylesheet" type="text/css" href="../css/layouts/side-menu.css" />
+    </head>
+
+    <body class="site">
+
+      <div id="layout">
+
+        <div id="nav">
+            
+<a href="#menu" id="menuLink" class="menu-link">
+    <!-- Hamburger icon -->
+    <span></span>
+</a>
+<div id="menu">
+    <div class="pure-menu menu">
+        <span class="pure-menu-heading">
+            <span>CBMM @</span>
+            <a href="https://github.com/CBMM">
+                <img src="../images/GitHub.png" /></a>
+        </span>
+        <ul class="pure-menu-list">
+            <li class="pure-menu-item">
+                <a href="../" class="pure-menu-link"> <span>Home</span></a>
+            </li>
+            <li class="pure-menu-item">
+                <a href="../about.html" class="pure-menu-link"><span>About</span></a>
+            </li>
+            <li class="pure-menu-item">
+                <a href="../projects.html" class="pure-menu-link"><span>Projects</span></a>
+            </li>
+            <li class="pure-menu-item">
+                <a href="../contact.html" class="pure-menu-link"><span>Contact</span></a>
+            </li>
+            <li class="pure-menu-item">
+                <a href="../archive.html" class="pure-menu-link"><span>Archive</span></a>
+            </li>
+        </ul>
+</div>
+</div>
+
+        </div>
+
+        <div id="header">
+          <div class="banner flex-container">
+              <img class="banner-logo" src="../images/bannerLogo.svg" />
+          </div>
+        </div>
+
+        <div id="content" class="content">
+
+            <h1>Opening your research up to the web - Day 1</h1>
+
+            <div class="info">
+    Posted on January 11, 2016
+    
+        by Greg Hale
+    
+</div>
+<div class="info">
+    
+    Tags: 
+    
+</div>
+
+<p>Day 1 of <a href="http://student.mit.edu/searchiap/iap-9289af8f51100344015126e75301021d.html">Opening your Research</a> was a big hit! Five people showed up. Three of them are young grad students. One is an MIT alum from the class of ’77, who took <a href="http://people.csail.mit.edu/phw/">Patrick Winston</a>’s (my dear boss) first <a href="https://ai6034.mit.edu/wiki/index.php?title=Main_Page">Intro to Artificial Intelligence</a> class. And finally there was an MIT alum in his 40’s who holds some of the early wind-energy patents. Great group! I’m disappointed that the ’77 alum won’t be sticking around, but the remainder sound like they will be here for the week. That’s enough time for us to get some things done.</p>
+<p>Let’s take a look at the goals I write down earlier today and see if we met them.</p>
+<blockquote>
+<ul>
+<li>Start collaborative relationships with at least a few students interested in giving their research an online presence.</li>
+<li>Give everyone enough confidence to continue learning and implement their own data/tool-sharing when they’re ready</li>
+</ul>
+</blockquote>
+<!--more-->
+<p>I probably was overly concerned here and set out easy goals to hit, because I think we did manage to hit these. We had nice chemistry as a group, people were comfortable to fit in and pipe up. I was really impressed by the students. At the same time, some had never heard of the tools I consider completely standard, like GitHub. One student in particular seemed to have an epiphany during the class, about how useful it would be if there were some system for organizing the efforts of people collaborating on software. I interrupted him to show him <a href="https://github.com/snapframework/snap/pull/166">this</a> pull request for <a href="http://snapframework.com">snap</a>, a Haskell web framework with a pretty active user base. His mind appeared to be blown. I’m really optimistic that this kind of exposure to open source for successful senior engineers will be great for both sides.</p>
+<p>What did we do? Three things mainly:</p>
+<ol style="list-style-type: decimal">
+<li>Personal introductions</li>
+<li>Round-table brainstorming on a project to tackle for the week</li>
+<li>Little demos of various online tools (<a href="https://jaspervdj.be/hakyll/">Hakyll</a>, <a href="http://github.com">GitHub</a>, <a href="https://pages.github.com/">GitHub Pages</a>, <a href="http://markup.rocks/">markup.rocks</a>, and the <a href="https://developer.chrome.com/devtools">Chrome DevTools</a></li>
+<li>Discussed when static sites are ok and when you need to turn to custom servers and AWS</li>
+<li>Set up an html/css/js inches-to-cm converter and hosted it on GitHub Pages</li>
+</ol>
+<p>That last point got 50% done with all students in attendance. But we did a lot of talking and didn’t finish. So the last 50% was done with one student in the half-hour after class officially ended. This phase may have been my favorite, in fact, because I was free to make a lot of mistakes, and the student and I (I hope to memorize all their names next time) got to troubleshoot together. How does it work? Let me show you!</p>
+<p>We started by initializing a new git repository.</p>
+<pre><code>mkdir inches &amp;&amp; cd inches
+git init</code></pre>
+<p>and made our <code>index.html</code> file</p>
+<div class="sourceCode"><pre class="sourceCode html"><code class="sourceCode html"><span class="kw">&lt;html&gt;</span>
+  <span class="kw">&lt;head&gt;</span> <span class="kw">&lt;/head&gt;</span>
+  <span class="kw">&lt;body&gt;</span>
+    <span class="kw">&lt;h1</span><span class="ot"> class=</span><span class="st">&quot;myheader&quot;</span><span class="kw">&gt;</span>Inches to CM converter<span class="kw">&lt;/h1&gt;</span>
+    Inches: <span class="kw">&lt;input</span><span class="ot"> type=</span><span class="st">&quot;text&quot;</span><span class="ot"> id=</span><span class="st">&quot;inchesField&quot;</span><span class="kw">&gt;&lt;/input&gt;</span>
+    <span class="kw">&lt;br/&gt;</span>
+    CM: <span class="kw">&lt;input</span><span class="ot"> type=</span><span class="st">&quot;text&quot;</span><span class="ot"> id=</span><span class="st">&quot;cmField&quot;</span><span class="ot"> disabled=</span><span class="st">&quot;disabled&quot;</span><span class="kw">&gt;&lt;/input&gt;</span>
+  <span class="kw">&lt;/body&gt;</span>
+<span class="kw">&lt;/html&gt;</span></code></pre></div>
+<p>We have our html tags, a couple of which have <code>type</code> and <code>id</code> attributes. For a really nice introduction to these kinds of things, check out <a href="https://www.codecademy.com/">CodeAcademy</a> for a 2-3 hour interactive tutorial (in all honesty, I had done only a tiny bit of html and zero css, before taking the CourseAcademy classes on html and css). If you are still following along, venture on :).</p>
+<p>I then wanted to demo a little bit of css styling. We made a file <code>default.css</code>:</p>
+<div class="sourceCode"><pre class="sourceCode css"><code class="sourceCode css"><span class="fl">.myheader</span> <span class="kw">{</span>
+  <span class="kw">background-color:</span> <span class="dt">green</span><span class="kw">;</span>
+  <span class="kw">box-shadow:</span> <span class="dt">5px</span> <span class="dt">5px</span> <span class="dt">5px</span> <span class="dt">black</span><span class="kw">;</span>
+<span class="kw">}</span></code></pre></div>
+<p>We have to modify <code>index.html</code> to link this file in, by changing the <code>&lt;head&gt;</code> tag:</p>
+<div class="sourceCode"><pre class="sourceCode html"><code class="sourceCode html">  <span class="kw">&lt;head&gt;</span>
+    <span class="kw">&lt;link</span><span class="ot"> rel=</span><span class="st">&quot;stylesheet&quot;</span><span class="ot"> href=</span><span class="st">&quot;default.css&quot;</span><span class="kw">&gt;&lt;/link&gt;</span>
+  <span class="kw">&lt;/head&gt;</span></code></pre></div>
+<p>We then type <code>file:///Users/greghale/Programming/inches/index.html</code> in the browser’s url bar to see what we’ve done. Right-clicking on the big text header and choosing ‘Inspect’ in Chrome, we can pick a new color we like graphically and copy the color value back into <code>default.css</code></p>
+<p><img style="width:300px;" src="../images/openingresearch/devtools.png" /></p>
+<p>With the basic layout (content in the <code>.html</code>, styles in the <code>.css</code>), we set out to do the unit conversion in JavaScript. First we made a couple changes to the <code>.html</code> file to link in a JavaScript file we would write, and also to bring in <a href="http://jquery.com">jQuery</a>, which makes connecting the js code to the elements on the page (the DOM), a bit easier:</p>
+<div class="sourceCode"><pre class="sourceCode html"><code class="sourceCode html"><span class="kw">&lt;html&gt;</span>
+  <span class="kw">&lt;head&gt;</span>
+    <span class="kw">&lt;link</span><span class="ot"> rel=</span><span class="st">&quot;stylesheet&quot;</span><span class="ot"> href=</span><span class="st">&quot;default.css&quot;</span><span class="kw">&gt;&lt;/link&gt;</span>
+    <span class="kw">&lt;script</span><span class="ot"> src=</span><span class="st">&quot;http://code.jquery.com/jquery-1.12.0.min.js&quot;</span><span class="kw">&gt;&lt;/script&gt;</span>
+  <span class="kw">&lt;/head&gt;</span>
+  <span class="kw">&lt;body&gt;</span>
+    <span class="kw">&lt;h1</span><span class="ot"> class=</span><span class="st">&quot;myheader&quot;</span><span class="kw">&gt;</span>Inches to CM converter<span class="kw">&lt;/h1&gt;</span>
+    Inches: <span class="kw">&lt;input</span><span class="ot"> type=</span><span class="st">&quot;text&quot;</span><span class="ot"> id=</span><span class="st">&quot;inchesField&quot;</span><span class="kw">&gt;&lt;/input&gt;</span>
+    <span class="kw">&lt;br/&gt;</span>
+    CM: <span class="kw">&lt;input</span><span class="ot"> type=</span><span class="st">&quot;text&quot;</span><span class="ot"> id=</span><span class="st">&quot;cmField&quot;</span><span class="ot"> disabled=</span><span class="st">&quot;disabled&quot;</span><span class="kw">&gt;&lt;/input&gt;</span>
+    <span class="kw">&lt;script</span><span class="ot"> src=</span><span class="st">&quot;calc.js&quot;</span><span class="kw">&gt;&lt;/script&gt;</span>
+  <span class="kw">&lt;/body&gt;</span>
+<span class="kw">&lt;/html&gt;</span></code></pre></div>
+<p>Then the <code>.js</code> file, which we wrote piece-by-piece, loading in the work so far through <code>index.html</code> and testing parts by hand, before wiring them all together.</p>
+<div class="sourceCode"><pre class="sourceCode javascript"><code class="sourceCode javascript"><span class="kw">function</span> <span class="at">calc</span> ()<span class="op">{</span>
+    cmVal <span class="op">=</span> <span class="at">inToCm</span>( <span class="at">parseFloat</span>(<span class="va">inchesField</span>.<span class="at">value</span>) )<span class="op">;</span>
+    <span class="va">cmField</span>.<span class="at">value</span> <span class="op">=</span> cmVal<span class="op">;</span>
+<span class="op">}</span>
+
+<span class="kw">function</span> <span class="at">inToCm</span>(x)<span class="op">{</span>
+    <span class="cf">return</span> (x<span class="op">*</span><span class="fl">2.54</span>)<span class="op">;</span>
+<span class="op">}</span>
+
+<span class="kw">function</span> <span class="at">setup</span>() <span class="op">{</span>
+    <span class="va">console</span>.<span class="at">log</span>(<span class="st">'test'</span>)<span class="op">;</span>
+    inchesField <span class="op">=</span> <span class="at">$</span>(<span class="st">'#in'</span>)[<span class="dv">0</span>]<span class="op">;</span>
+    cmField <span class="op">=</span> <span class="at">$</span>(<span class="st">'#cm'</span>)[<span class="dv">0</span>]<span class="op">;</span>
+    <span class="va">inchesField</span>.<span class="at">onkeyup</span> <span class="op">=</span> calc<span class="op">;</span>
+<span class="op">}</span>
+
+<span class="at">$</span>(<span class="st">'document'</span>).<span class="at">ready</span>(<span class="kw">function</span>()<span class="op">{</span>
+    <span class="va">console</span>.<span class="at">log</span>(<span class="st">'ready!'</span>)<span class="op">;</span>
+    <span class="at">setup</span>()<span class="op">;</span>
+<span class="op">}</span>)<span class="op">;</span></code></pre></div>
+<p>That wasn’t very much code (30 lines or so?). Here is the final result. Although there is a lot of jargon around the particular tags and functions, but what I hope to convey is that web development is entirely within reach. You just have to not be intimidated by learning the three syntaxes of html, css, and javascript. And you have to feel comfortable googling when you come up against a problem.</p>
+<script src="http://code.jquery.com/jquery-1.12.0.min.js"></script>
+<script>
+
+function calc (){
+    cmVal = inToCm( parseFloat (inchesField.value) );
+    cmField.value = cmVal;
+}
+
+function inToCm(x){
+    return (x*2.54);
+}
+
+function setup() {
+    console.log('test');
+    inchesField = $('#in')[0];
+    cmField = $('#cm')[0];
+    inchesField.onkeyup = calc;
+}
+
+$('document').ready(function(){
+    console.log('ready!');
+    setup();
+});
+</script>
+<div class="demo" style="border: 1px solid black;max-width:400px;padding:20px;">
+<h1 class="text" style="background-color:#6A6AA5;box-shadow: 5px 5px 5px black;color:black;">
+Inches to CM converter
+</h1>
+<p>Inches<input type="text" id="in" /> <br /> CM<input type="text" id="cm" disabled="disabled" /></p>
+</div>
+<h1 id="hosting">Hosting</h1>
+<p>The last step was to push this all to a waiting github repository, using the <code>gh-pages</code> branch to get free file hosting. (You won’t be able to copy-paste these commands, because they point to my github account, but this will work for your account if you have your <a href="https://help.github.com/articles/generating-ssh-keys/">ssh keys</a> set up)</p>
+<pre><code>git checkout -b gh-pages
+git add *.html
+git add *.css
+git add *.js
+git commit -m &quot;Initial commit&quot;
+git remote add origin git@github.com:imalsogreg/inches
+git push origin gh-pages</code></pre>
+<h1 id="research-areas">Research areas</h1>
+<p>Some of the research areas and web topics the students brought up:</p>
+<ul>
+<li>Clean energy</li>
+<li>Static sites (not hosted too well)</li>
+<li>Chemistry interactive</li>
+<li>Cancer therapy crowd-source game</li>
+</ul>
+<p>I’m really looking forward to diving in and picking something concrete to work on in the next class!</p>
+
+        </div>
+
+        <div id="footer">
+            <span>Site proudly generated by
+                <a href="http://jaspervdj.be/hakyll">
+                    Hakyll</a>
+            </span>
+            <a href="http://www.nsf.gov" class="nsf-link">
+              <img src="../images/logo-nsf.png">
+            </a>
+        </div>
+
+      </div>
+      <script src="../js/ui.js">
+      </script>
+    </body>
+</html>
