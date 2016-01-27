@@ -8,12 +8,17 @@ tags: open science, css
 Today we'll let our [right brain](https://www.braindecoder.com/neil-degrasse-tyson-elegantly-debunk-right-left-brain-myth-1120713524.html) have some more fun.
 
 We can start with paper and pencil.
-Dry-erase boards are great too, because we generally have a few colored markers to work with, and the thick lines are nicer to look at.
+Dry-erase boards are great too, because we have some colored markers to work with, and the thick lines are nicer to look at.
 
 Imagine your page, and take your time to draw what you see.
-Like writing[^1], drawing a draft forces a level of concreteness to your idea that generally can't be gotten through imagination alone[^2].
-This is true not just for the design of yours site, but even for the features.
-When drawing the left half of this mock-up, it occurred to me that the page lacks any sort of feeling of continuity through time, so I added the 'Recent Reactions' tab on the right.
+Like writing[^1], drawing a draft forces a level of concreteness to your idea that can't be gotten through imagination alone[^2].
+This isn't just about the design - it's also about discovering features.
+
+<!--more-->
+
+<img src="/images/rmg_whiteboard.jpg" style="width:50%"></img>
+
+When drawing the left half of this mock-up, it occurred to me that the page lacks any sort of feeling of continuity through time, so I added the 'Recent Jobs section on the right.
 Without 'Recent Reactions', it's not clear to the user what will happen when they click 'Submit'.
 Now, when we put a 'Recent Reactions' section on the page, we're foreshadowing that submitting the job won't throws us to a new page with a confirmation number - no.
 Instead we will see something much nicer - our results should appear on the right when they are ready, with a download link, among the other recently run jobs.
@@ -22,7 +27,7 @@ If so, drawing will probably help you find the right features for your project's
 
 [^1]: Simon Peyton-Jones describes [in this video](https://www.youtube.com/watch?v=g3dkRsTqdDA) the effect that writing your ideas can have on the ideas themselves. A great watch for any researcher.
 
-[^2]: In [Telsa: Inventor of the Electrical Age](http://www.amazon.com/Tesla-Inventor-Electrical-Bernard-Carlson/dp/0691165610/ref=sr_1_1?s=books&ie=UTF8&qid=1453918778&sr=1-1&keywords=tesla), Carlson describes the vivid hallucinations that haunted Nicola Tesla in his childhood and throughout his adult life. When Telsa learned to harness his hallucinations in adolescence, he was able to design complex new AC motor designs in perfect detail without the aid of any physical prototypes or drawings. That Telsa achieved incredible insights through imagination is indisputable, however when he attempted to build an actual motor, he was confronted with an avalanche of unanticipated technical details. In one case, he secretly built one of his AC motor designs in the basement of one of his employer's AC generator facilities. Built to perfectly match the design in his mind's eye, the motor didn't turn at all, because he made his electromagnet windings around a piece of non-magnetizing brass. To make his design work, he had to jam a metal file into the windings and twist it around looking for an orientation that produced the right orientations of magnetic field. Software developers and scientists will both be familiar with this semi-random form of engineering.
+[^2]: In [Telsa: Inventor of the Electrical Age](http://www.amazon.com/Tesla-Inventor-Electrical-Bernard-Carlson/dp/0691165610/ref=sr_1_1?s=books&ie=UTF8&qid=1453918778&sr=1-1&keywords=tesla), Carlson describes the vivid hallucinations that haunted Nicola Tesla in his childhood. When Telsa learned to harness his hallucinations in adolescence, he was able to design complex new AC motor designs in perfect detail without the aid of any physical prototypes or drawings. That Telsa achieved incredible insights through imagination is indisputable, however when he attempted to build an actual motor, he was confronted with an avalanche of unanticipated technical details. His first attempt at a brushless AC motor for instance didn't turn at all, because he made his wire windings around a piece of non-magnetizing brass. To make his design work, he had to jam a long steel file into the windings and twist it around in search of an orientation that would produce the correct magnetic field. Software developers and scientists will both be familiar with this semi-random form of engineering - jamming more than metal files in all kinds of places when we discover something doesn't work the way it did in our mind's perfect image.
 
 How can we turn this sketch into a real page?
 We'll start with the html.
