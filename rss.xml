@@ -23,7 +23,7 @@
     
 </div>
 
-<p><a href="posts/2016-01-13-opening-up-your-research-day-3.html">Last time</a>, we discussed some austere topics around blocking and asynchronous execution, and we may have started to feel like insurmountable piles of jargon stand between us and a working site, while our page still consists of just ugly input boxes and 90’s-looking text labels. Today we’ll let our <a href="https://www.braindecoder.com/neil-degrasse-tyson-elegantly-debunk-right-left-brain-myth-1120713524.html">right brain</a> have some more fun.</p>
+<p><a href="/posts/2016-01-13-opening-up-your-research-day-3.html">Last time</a>, we discussed some austere topics around blocking and asynchronous execution, and we may have started to feel like insurmountable piles of jargon stand between us and a working site, while our page still consists of just ugly input boxes and 90’s-looking text labels. Today we’ll let our <a href="https://www.braindecoder.com/neil-degrasse-tyson-elegantly-debunk-right-left-brain-myth-1120713524.html">right brain</a> have some more fun.</p>
 <p>We can start with paper and pencil. Dry-erase boards are great too, because we have some colored markers to work with, and the thick lines are nicer to look at.</p>
 <p>Imagine your page, and take your time to draw what you see. Like writing<a href="#fn1" class="footnoteRef" id="fnref1"><sup>1</sup></a>, drawing a draft forces a level of concreteness to your idea that can’t be gotten through imagination alone<a href="#fn2" class="footnoteRef" id="fnref2"><sup>2</sup></a>. This isn’t just about the design - it’s also about discovering features.</p>
 <!--more-->
