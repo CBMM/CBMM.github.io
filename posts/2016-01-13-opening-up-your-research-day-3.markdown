@@ -4,7 +4,7 @@ author: Greg Hale
 tags: open science, teaching, snap, flask
 ---
 
-In our [last lecture](posts/2016-01-12-opening-up-your-research-day-2.html) we set up a server to call one of several shell commands depending the URL.
+In our [last lecture](/posts/2016-01-12-opening-up-your-research-day-2.html) we set up a server to call one of several shell commands depending the URL.
 I wouldn't recommend just rereading those posts in order to start web programming - instead you should refer to the very good documentation released with a web framework like [Snap](http://snapframework.com) or [Flask](http://flask.pocoo.org).
 When you get some familiarity with the languages used ([Haskell](http://haskell.org) and [Python](https://www.python.org) respectively), then the details in our code samples will begin to make more sense.
 

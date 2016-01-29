@@ -4,7 +4,7 @@ author: Greg Hale
 tags: open science, css
 ---
 
-[Last time](posts/2016-01-13-opening-up-your-research-day-3.html), we discussed some austere topics around blocking and asynchronous execution, and we may have started to feel like insurmountable piles of jargon stand between us and a working site, while our page still consists of just ugly input boxes and 90's-looking text labels.
+[Last time](/posts/2016-01-13-opening-up-your-research-day-3.html), we discussed some austere topics around blocking and asynchronous execution, and we may have started to feel like insurmountable piles of jargon stand between us and a working site, while our page still consists of just ugly input boxes and 90's-looking text labels.
 Today we'll let our [right brain](https://www.braindecoder.com/neil-degrasse-tyson-elegantly-debunk-right-left-brain-myth-1120713524.html) have some more fun.
 
 We can start with paper and pencil.
