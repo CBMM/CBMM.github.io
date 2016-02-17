@@ -151,14 +151,14 @@ a:visited {
 }
 
 .read-more {
-    background-color: hsla(208,54%,81%,1);
-    padding: 3px;
-    border-radius:4px;
-    border: 1px solid hsla(208,54%,81%,1);
+    padding: 8px;
+    border-radius:20px;
+    transition: background-color 0.2s;
+    border: 1px solid hsla(208,54%,55%,1);
 }
 
 .read-more:hover {
-    border: 1px solid hsla(208,54%,55%,1);
+    background-color: hsla(208,54%,91%,1);
 }
 
 .post-item{
