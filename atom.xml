@@ -8,8 +8,108 @@
         <name>Replace me</name>
         <email></email>
     </author>
-    <updated>2016-01-14T00:00:00Z</updated>
+    <updated>2016-02-16T00:00:00Z</updated>
     <entry>
+    <title>Artbitrary</title>
+    <link href="http://example.com/posts/2016-02-16-juicy-pixels.html" />
+    <id>http://example.com/posts/2016-02-16-juicy-pixels.html</id>
+    <published>2016-02-16T00:00:00Z</published>
+    <updated>2016-02-16T00:00:00Z</updated>
+    <summary type="html"><![CDATA[<div class="info">
+    Posted on February 16, 2016
+    
+        by Greg Hale
+    
+</div>
+<div class="info">
+    
+    Tags: <a href="/tags/CBaaS.html">CBaaS</a>, <a href="/tags/haskell.html">haskell</a>, <a href="/tags/development.html">development</a>, <a href="/tags/unit-test.html">unit-test</a>
+    
+</div>
+
+<p>While setting up a test suite for <a href="https://github.com/CBMM/CBaaS">CBaaS</a>, I needed to produce random images. An <code>Arbitrary</code> instance for <a href="http://hackage.haskell.org/package/JuicyPixels">JuicyPixel</a>’s <code>DynamicImage</code> type is the way to do this in Haskell. While producing a list of random <code>Pixel</code>s at different colors would have been enough to make the tests work, the output wouldn’t be very interesting to look at - it would just be colorful white noise.</p>
+<p>What if we use <a href="https://hackage.haskell.org/package/QuickCheck">QuickCheck</a>’s ability to produce arbitrary functions, and pass an arbitrary <code>(Int, Int) -&gt; Pixel</code> function into <a href="http://hackage.haskell.org/package/JuicyPixels-3.2.7/docs/Codec-Picture.html#v:generateImage"><code>generateImage</code></a>? Instead of fully random pixels, we would get random functions that determine a Pixel’s color from its location (it may seem like the difference between random Pixels and random functions producing Pixels are one and the same - but the random pixels case is actually an extremely specific function).</p>
+<p>How does QuickCheck produce random functions? What would I expect the output to look like? I have no idea, although I’d to look into it. In the meantime, here are some examples.</p>
+<div class="figure">
+<img src="/images/arbitraryjuicy/4.png" style="height:200px;margin:2px;"/>
+<p class="caption" style="border-style:solid;border-width:1px 0px 0px 0px;font-size:12px;">
+An example image created with QuickCheck’s Arbitrary function generator
+</p>
+</div>
+<!--more-->
+<p>Another generated image seems to have horizontal bands in one color channel. What sort of <code>(Int, Int) -&gt; Pixel</code> would produce it?</p>
+<div class="figure">
+<img src="/images/arbitraryjuicy/55.png" alt="Different spatial frequencies in different color channels" />
+<p class="caption">Different spatial frequencies in different color channels</p>
+</div>
+<div class="figure">
+<div class="several">
+<img src="/images/arbitraryjuicy/5.png" class="juicy-example"/><img src="/images/arbitraryjuicy/37.png" class="juicy-example"/><img src="/images/arbitraryjuicy/61.png" class="juicy-example"/>
+</div>
+<p class="caption">
+An interesting common pattern: horizontal or vertical striations
+</p>
+</div>
+<div class="figure">
+<img src="/images/arbitraryjuicy/97.png" alt="A picture with a kind of even-odd structure in the rows" />
+<p class="caption">A picture with a kind of even-odd structure in the rows</p>
+</div>
+<div class="figure">
+<div class="several">
+<img src="/images/arbitraryjuicy/42.png" class="juicy-example"/><img src="/images/arbitraryjuicy/12.png" class="juicy-example"/><img src="/images/arbitraryjuicy/63.png" class="juicy-example"/>
+</div>
+<p class="caption">
+Not all of the pictures generated were this interesting. The majority looked like confetti-colored white noise, as you would expect from a function that throws away the input coordinates and returns a randomly colored pixel. Actually the last picture above is neat: half way through it changes spatial frequency.
+</p>
+</div>
+<p>Some things decidedly <em>did not</em> show up in the output. I found no examples where the <code>x</code> and <code>y</code> axes were independent (no straight horizontal bars, straight vertical bars, or checkerboards). No simple dependencies showed up either (e.g. <code>if x == y then Blue else Green</code>). Many were not encodable in PNG and so aren’t shown here. Many are solid black (QuickCheck focuses its testing effort on corner cases - I imagine <code>\(x,y) -&gt; Black</code> is a value that gets picked often while other parameters (<code>width</code>, <code>height</code>) are varied. Below are all the pictures that came out in this test run, to give a sense of the distribution. Below are the fifty or so images that <code>Arbitrary</code> produced from 100 runs of the test.</p>
+<style>
+
+div.figure {
+ margin: 40px;
+}
+
+div.figure div.several {
+  display: flex;
+  margin-left: auto;
+  margin-right: auto;
+  width: 80%;
+}
+
+div.figure div.several img{
+  display: inline-block;
+}
+
+div.figure .caption{
+  border-style: solid;
+  border-width: 1px 0px 0px 0px;
+  font-size: 12px;
+}
+
+div.figure img{
+  display: block;
+  height:100px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.juicy-example {
+  height: 100px;
+  margin: 2px;
+}
+</style>
+<p><img class="juicy-example" src="/images/arbitraryjuicy/0.png"/> <img class="juicy-example" src="/images/arbitraryjuicy/10.png"/> <img class="juicy-example" src="/images/arbitraryjuicy/12.png"/> <img class="juicy-example" src="/images/arbitraryjuicy/13.png"/> <img class="juicy-example" src="/images/arbitraryjuicy/14.png"/> <img class="juicy-example" src="/images/arbitraryjuicy/15.png"/> <img class="juicy-example" src="/images/arbitraryjuicy/16.png"/> <img class="juicy-example" src="/images/arbitraryjuicy/18.png"/> <img class="juicy-example" src="/images/arbitraryjuicy/19.png"/> <img class="juicy-example" src="/images/arbitraryjuicy/20.png"/> <img class="juicy-example" src="/images/arbitraryjuicy/21.png"/> <img class="juicy-example" src="/images/arbitraryjuicy/22.png"/> <img class="juicy-example" src="/images/arbitraryjuicy/25.png"/> <img class="juicy-example" src="/images/arbitraryjuicy/27.png"/> <img class="juicy-example" src="/images/arbitraryjuicy/28.png"/> <img class="juicy-example" src="/images/arbitraryjuicy/29.png"/> <img class="juicy-example" src="/images/arbitraryjuicy/3.png"/> <img class="juicy-example" src="/images/arbitraryjuicy/30.png"/> <img class="juicy-example" src="/images/arbitraryjuicy/31.png"/> <img class="juicy-example" src="/images/arbitraryjuicy/34.png"/> <img class="juicy-example" src="/images/arbitraryjuicy/36.png"/> <img class="juicy-example" src="/images/arbitraryjuicy/37.png"/> <img class="juicy-example" src="/images/arbitraryjuicy/38.png"/> <img class="juicy-example" src="/images/arbitraryjuicy/39.png"/> <img class="juicy-example" src="/images/arbitraryjuicy/4.png"/> <img class="juicy-example" src="/images/arbitraryjuicy/40.png"/> <img class="juicy-example" src="/images/arbitraryjuicy/41.png"/> <img class="juicy-example" src="/images/arbitraryjuicy/42.png"/> <img class="juicy-example" src="/images/arbitraryjuicy/44.png"/> <img class="juicy-example" src="/images/arbitraryjuicy/46.png"/> <img class="juicy-example" src="/images/arbitraryjuicy/47.png"/> <img class="juicy-example" src="/images/arbitraryjuicy/48.png"/> <img class="juicy-example" src="/images/arbitraryjuicy/49.png"/> <img class="juicy-example" src="/images/arbitraryjuicy/5.png"/> <img class="juicy-example" src="/images/arbitraryjuicy/51.png"/> <img class="juicy-example" src="/images/arbitraryjuicy/52.png"/> <img class="juicy-example" src="/images/arbitraryjuicy/53.png"/> <img class="juicy-example" src="/images/arbitraryjuicy/55.png"/> <img class="juicy-example" src="/images/arbitraryjuicy/56.png"/> <img class="juicy-example" src="/images/arbitraryjuicy/6.png"/> <img class="juicy-example" src="/images/arbitraryjuicy/60.png"/> <img class="juicy-example" src="/images/arbitraryjuicy/61.png"/> <img class="juicy-example" src="/images/arbitraryjuicy/62.png"/> <img class="juicy-example" src="/images/arbitraryjuicy/63.png"/> <img class="juicy-example" src="/images/arbitraryjuicy/64.png"/> <img class="juicy-example" src="/images/arbitraryjuicy/65.png"/> <img class="juicy-example" src="/images/arbitraryjuicy/67.png"/> <img class="juicy-example" src="/images/arbitraryjuicy/68.png"/> <img class="juicy-example" src="/images/arbitraryjuicy/7.png"/> <img class="juicy-example" src="/images/arbitraryjuicy/70.png"/> <img class="juicy-example" src="/images/arbitraryjuicy/71.png"/> <img class="juicy-example" src="/images/arbitraryjuicy/72.png"/> <img class="juicy-example" src="/images/arbitraryjuicy/75.png"/> <img class="juicy-example" src="/images/arbitraryjuicy/78.png"/> <img class="juicy-example" src="/images/arbitraryjuicy/79.png"/> <img class="juicy-example" src="/images/arbitraryjuicy/8.png"/> <img class="juicy-example" src="/images/arbitraryjuicy/80.png"/> <img class="juicy-example" src="/images/arbitraryjuicy/81.png"/> <img class="juicy-example" src="/images/arbitraryjuicy/82.png"/> <img class="juicy-example" src="/images/arbitraryjuicy/84.png"/> <img class="juicy-example" src="/images/arbitraryjuicy/85.png"/> <img class="juicy-example" src="/images/arbitraryjuicy/86.png"/> <img class="juicy-example" src="/images/arbitraryjuicy/9.png"/> <img class="juicy-example" src="/images/arbitraryjuicy/90.png"/> <img class="juicy-example" src="/images/arbitraryjuicy/91.png"/> <img class="juicy-example" src="/images/arbitraryjuicy/92.png"/> <img class="juicy-example" src="/images/arbitraryjuicy/93.png"/> <img class="juicy-example" src="/images/arbitraryjuicy/95.png"/> <img class="juicy-example" src="/images/arbitraryjuicy/96.png"/> <img class="juicy-example" src="/images/arbitraryjuicy/97.png"/> <img class="juicy-example" src="/images/arbitraryjuicy/98.png"/> <img class="juicy-example" src="/images/arbitraryjuicy/99.png"/></p>
+<p>This is the code used to <code>Gen</code>erate an <code>Image a</code> for one of <code>JuicyPixel</code>s <code>Pixes</code> types. It <a href="https://github.com/CBMM/CBaaS/blob/84c9607b9de856091344b13392022e5e1847af45/test/ModelSpec.hs#L77-L85">comes from</a> on <a href="https://github.com/CBMM/CBaaS">CBaaS</a>. There’s nothing to it - all the magic is in QuickCheck’s <a href="https://hackage.haskell.org/package/QuickCheck-2.8.2/docs/Test-QuickCheck-Function.html"><code>Function</code></a> module. <code>Proxy</code> isn’t important to this post - it’s used in my test suite to pick a particular <code>Pixel</code> type.</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">genImg ::</span> (<span class="dt">Pixel</span> a, <span class="dt">Arbitrary</span> a) <span class="ot">=&gt;</span> <span class="dt">Proxy</span> a <span class="ot">-&gt;</span> <span class="dt">Gen</span> (<span class="dt">Image</span> a)
+genImg _ <span class="fu">=</span> <span class="kw">do</span>
+  wid <span class="ot">&lt;-</span> choose (<span class="dv">100</span>, <span class="dv">300</span>)
+  hgt <span class="ot">&lt;-</span> choose (<span class="dv">100</span>, <span class="dv">300</span>)
+<span class="ot">  f ::</span> <span class="dt">Fun</span> (<span class="dt">Int</span>,<span class="dt">Int</span>) a <span class="ot">&lt;-</span> arbitrary
+  <span class="kw">let</span> img <span class="fu">=</span> generateImage (curry (apply f)) wid hgt
+  return img</code></pre></div>
+]]></summary>
+</entry>
+<entry>
     <title>Opening up your research to the web - Day 4</title>
     <link href="http://example.com/posts/2016-01-14-opening-up-your-research-day-4.html" />
     <id>http://example.com/posts/2016-01-14-opening-up-your-research-day-4.html</id>
