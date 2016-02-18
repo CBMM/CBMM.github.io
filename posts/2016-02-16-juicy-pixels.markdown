@@ -11,7 +11,7 @@ What if we use [QuickCheck](https://hackage.haskell.org/package/QuickCheck)'s ab
 How does QuickCheck produce random functions? What would I expect the output to look like? I have no idea, although I'd to look into it. In the meantime, here are some examples.
 
 <aside style="background-color:#1f8dd6;width:80%;margin: 0 auto;color:white;margin:20px;padding:5px;border-radius:3px;font-size:10pt;">
-NOTE: Some of the pictures apear smoothed. This isn't QuickCheck - it's just the browser scaling smaller images up to the same height as larger images.
+NOTE: Some of the pictures appear smoothed. This isn't QuickCheck - it's just the browser scaling smaller images up to the same height as larger images.
 </aside>
 
 <div class="figure">
