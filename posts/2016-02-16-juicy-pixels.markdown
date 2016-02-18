@@ -10,6 +10,10 @@ What if we use [QuickCheck](https://hackage.haskell.org/package/QuickCheck)'s ab
 
 How does QuickCheck produce random functions? What would I expect the output to look like? I have no idea, although I'd to look into it. In the meantime, here are some examples.
 
+<aside style="background-color:#1f8dd6;width:80%;margin: 0 auto;color:white;margin:20px;padding:5px;border-radius:3px;font-size:10pt;">
+NOTE: Some of the pictures apear smoothed. This isn't QuickCheck - it's just the browser scaling smaller images up to the same height as larger images.
+</aside>
+
 <div class="figure">
 <img src="/images/arbitraryjuicy/4.png" style="height:200px;margin:2px;"/>
 <p class="caption" style="border-style:solid;border-width:1px 0px 0px 0px;font-size:12px;">
