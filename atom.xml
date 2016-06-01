@@ -1,18 +1,90 @@
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
-    <title>TODO: Hakyll Base Feed</title>
-    <link href="http://example.com/atom.xml" rel="self" />
-    <link href="http://example.com" />
-    <id>http://example.com/atom.xml</id>
+    <title>CBMM @ GitHub</title>
+    <link href="https://cbmm.github.io/atom.xml" rel="self" />
+    <link href="https://cbmm.github.io" />
+    <id>https://cbmm.github.io/atom.xml</id>
     <author>
-        <name>Replace me</name>
-        <email></email>
+        <name>Greg Hale</name>
+        <email>imalsogreg@gmail.com</email>
     </author>
-    <updated>2016-02-16T00:00:00Z</updated>
+    <updated>2016-03-16T00:00:00Z</updated>
     <entry>
+    <title>Processing video for web experiments</title>
+    <link href="https://cbmm.github.io/posts/2016-03-16-video-preprocessing.html" />
+    <id>https://cbmm.github.io/posts/2016-03-16-video-preprocessing.html</id>
+    <published>2016-03-16T00:00:00Z</published>
+    <updated>2016-03-16T00:00:00Z</updated>
+    <summary type="html"><![CDATA[<div class="info">
+    Posted on March 16, 2016
+    
+        by Greg Hale
+    
+</div>
+<div class="info">
+    
+    Tags: <a href="/tags/video.html">video</a>, <a href="/tags/open%20science.html">open science</a>
+    
+</div>
+
+<p>So you want to put video clips online for your experiment. In this article I’ll introduce you to some tools for processing video files for use in experiments. In another I’ll describe acquiring data from subjects watching videos.</p>
+<p>I’m here to help with this kind of thing. Please get in touch if needed! If you want to learn to do it for yourself, that’s also fantastic, and I hope this guide helps. If you discover a problem with the instructions, please let me know on our <a href="https://github.com/CBMM/CBMM.github.io/issues">issue tracker</a>.</p>
+<p>Where to start? There are three phases to think about:</p>
+<ol style="list-style-type: decimal">
+<li>Creation</li>
+<li>Storage &amp; Addressing</li>
+<li>Delivery</li>
+</ol>
+<!--more-->
+<p>And here are some of our design considerations:</p>
+<ul>
+<li>Formats should be playable in most web browsers</li>
+<li>Files should be small enough for quick loading</li>
+<li>Files should be large enough to avoid visible artifacts</li>
+<li>Naming schemes shouldn’t lead to subtle bugs</li>
+<li>Naming schemes prevent subjects or random people from downloading and watching the clips ahead of time</li>
+</ul>
+<p>Let’s take these one at a time, starting from a common user story: having one long video that we want to chop into smaller parts.</p>
+<p>The easiest way to embed video into a page is with the HTML5 <code>&lt;video&gt;</code> tag, like so:</p>
+<div class="sourceCode"><pre class="sourceCode html"><code class="sourceCode html"><span class="kw">&lt;video</span><span class="ot"> width=</span><span class="st">&quot;640&quot;</span><span class="ot"> height=</span><span class="st">&quot;480&quot;</span><span class="ot"> controls</span><span class="kw">&gt;</span>
+  <span class="kw">&lt;source</span><span class="ot"> src=</span><span class="st">&quot;clip-000001.mp4&quot;</span><span class="ot">  type=</span><span class="st">&quot;video/mp4&quot;</span><span class="kw">/&gt;</span>
+  <span class="kw">&lt;source</span><span class="ot"> src=</span><span class="st">&quot;clip-000001.ogg&quot;</span><span class="ot">  type=</span><span class="st">&quot;video/ogg&quot;</span><span class="kw">/&gt;</span>
+  <span class="kw">&lt;source</span><span class="ot"> src=</span><span class="st">&quot;clip-000001.webm&quot;</span><span class="ot"> type=</span><span class="st">&quot;video/webm&quot;</span><span class="kw">/&gt;</span>
+  <span class="kw">&lt;div</span><span class="ot"> class=</span><span class="st">&quot;error&quot;</span><span class="kw">&gt;</span>
+    Video is unsupported for your browser,
+    please get in touch with mygradstudent@mit.edu
+  <span class="kw">&lt;/div&gt;</span>
+<span class="kw">&lt;/video&gt;</span></code></pre></div>
+<p>The <code>&lt;video&gt;</code> tag is a bit like <code>&lt;ul&gt;</code> as it contains several elements inside: one <code>&lt;source/&gt;</code> listing the path of the video file… for each format you want to supply. Different browsers support different formats; mp4 is widely supported, with ogg and webm serving as fallbacks<a href="#fn1" class="footnoteRef" id="fnref1"><sup>1</sup></a>.</p>
+<h2 id="transcoding">Transcoding</h2>
+<p>The first thing to do is to get your source video into this format. <a href="https://www.ffmpeg.org/"><code>ffmpeg</code></a> is the correct tool for this. If you are on OSX, we recommend installing software via (the <a href="http://brew.sh">homebrew</a>):</p>
+<p><code>brew install ffmpeg</code></p>
+<p>If you are on Ubuntu:</p>
+<p><code>sudo apt-get install ffmpeg</code></p>
+<p><code>ffmpeg</code> is a real swiss-army knife. Learning to use it well is an investment with a large payoff - you can do a lot with video files that isn’t possible is, say, matlab. Read the <a href="https://www.ffmpeg.org/ffmpeg.html">documentation</a> before you try to do anything other than the specific tasks in this article. For now, just run:</p>
+<pre><code>ffmpeg -i path/to/video.m4v -strict -2 -b:v 2M video.mp4
+ffmpeg -i path/to/video.m4v -strict -2 -b:v 2M video.webm
+ffmpeg -i path/to/video.m4v -strict -2 -b:v 2M video.ogg
+</code></pre>
+<p>There, we assume you have a <code>m4v</code> source video (this format isn’t supported in web browsers) at <code>path/to/video.m4v</code>. The <code>-i</code> flag indicates that the following argument is an input. <code>-strict -2</code> is a flag to turn on <code>m4v</code> decoding (which is currently ‘experimental’, so it’s not available by default). <code>-b:v 2M</code> tells <code>ffmpeg</code> to use a 2MB/sec encoding rate for the output video. If you don’t like the size or quality of the output, tweak this parameter. The final argument is the output file in the format you want (<code>ffmpeg</code> picks the right encoding based on the file extension you use here). Depending on the format, expect transcoding to run between 0.2x and 5x of real time - a 1 minute video will take anywhere from 5 minutes to 12 seconds.</p>
+<h2 id="unfolding">Unfolding</h2>
+<p>The next thing we often do is extract lots of clips from the video<a href="#fn2" class="footnoteRef" id="fnref2"><sup>2</sup></a>. For all the things <code>ffmpeg</code> can do, unfolding a long video into a long list of short videos efficiently is not one of them. I wrote a command line utility called <a href="https://github.com/CBMM/videoutils/releases">CutAtFrames</a>(<a href="https://github.com/CBMM/videoutils">repo</a>) for this. <code>CutAtFrames</code> takes a path to an input video, a path to a file with a list of cut frames, the framerate, and an output directry. It first breaks the input file into ~2 minute chunks<a href="#fn3" class="footnoteRef" id="fnref3"><sup>3</sup></a>, and then divides those chunks into clips at the boundaries that you specify in the cut frames file. Seeking and copying from the video file is not very fast, so <code>CutAtFrames</code> generally takes a few hours to run for a two hour movie cut into ten second clips.</p>
+<p>The contents of the cut file is a single integer marking the last frame of the clip (the first frame is inferred to be the one after the last frame of the last clip - the next version may take frame ranges here instead). A sample run looks like this:</p>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="kw">./CutAtFrames</span> -i Videos/pointlights.mp4 -c Videos/pcuts.txt -f 29.97 -b 120 -o ./mp4/</code></pre></div>
+<div class="footnotes">
+<hr />
+<ol>
+<li id="fn1"><p>Mozilla Developer Network <a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Supported_media_formats">documentation</a> about browser media support. <a href="https://developer.mozilla.org">MDN</a> is a really wonderful resource!<a href="#fnref1">↩</a></p></li>
+<li id="fn2"><p>Alternatively maybe we could embed a single large video file, and to divide it into trials, just programatically seek to different parts of the video. That is probably a very nice solution to the problem of breaking a video into small trials, but I haven’t tried it yet to let you know how it goes. At the least, we will have to write a little javascript to seek to parts of the video, stop at the correct interval, and buffer.<a href="#fnref2">↩</a></p></li>
+<li id="fn3"><p>Why not divide the big video directly into the desired clips? It turns out that this is too slow. Seeking to the first frame of a clip take time proportional to the number of frames before the target. Assuming that your cuts are near some constant size, the number of cuts is proportional to the length of the video, so the total run time is proportional to the numer of cuts squared. Breaking the file into large chunks, we still have an <span class="math inline"><em>O</em>(<em>n</em><sup>2</sup>)</span> problem, but the constant factor is far smaller. Without pre-chunking, breaking a feature film into 5-second chunks would take about a week. With 2-minute pre-chunking it can be done in a few hours.<a href="#fnref3">↩</a></p></li>
+</ol>
+</div>
+]]></summary>
+</entry>
+<entry>
     <title>Artbitrary</title>
-    <link href="http://example.com/posts/2016-02-16-juicy-pixels.html" />
-    <id>http://example.com/posts/2016-02-16-juicy-pixels.html</id>
+    <link href="https://cbmm.github.io/posts/2016-02-16-juicy-pixels.html" />
+    <id>https://cbmm.github.io/posts/2016-02-16-juicy-pixels.html</id>
     <published>2016-02-16T00:00:00Z</published>
     <updated>2016-02-16T00:00:00Z</updated>
     <summary type="html"><![CDATA[<div class="info">
@@ -114,8 +186,8 @@ genImg _ <span class="fu">=</span> <span class="kw">do</span>
 </entry>
 <entry>
     <title>Opening up your research to the web - Day 4</title>
-    <link href="http://example.com/posts/2016-01-14-opening-up-your-research-day-4.html" />
-    <id>http://example.com/posts/2016-01-14-opening-up-your-research-day-4.html</id>
+    <link href="https://cbmm.github.io/posts/2016-01-14-opening-up-your-research-day-4.html" />
+    <id>https://cbmm.github.io/posts/2016-01-14-opening-up-your-research-day-4.html</id>
     <published>2016-01-14T00:00:00Z</published>
     <updated>2016-01-14T00:00:00Z</updated>
     <summary type="html"><![CDATA[<div class="info">
@@ -540,8 +612,8 @@ Job 2
 </entry>
 <entry>
     <title>Opening your research up to the web - Day 3</title>
-    <link href="http://example.com/posts/2016-01-13-opening-up-your-research-day-3.html" />
-    <id>http://example.com/posts/2016-01-13-opening-up-your-research-day-3.html</id>
+    <link href="https://cbmm.github.io/posts/2016-01-13-opening-up-your-research-day-3.html" />
+    <id>https://cbmm.github.io/posts/2016-01-13-opening-up-your-research-day-3.html</id>
     <published>2016-01-13T00:00:00Z</published>
     <updated>2016-01-13T00:00:00Z</updated>
     <summary type="html"><![CDATA[<div class="info">
@@ -624,8 +696,8 @@ Job 2
 </entry>
 <entry>
     <title>Opening your research up to the web - Day 2</title>
-    <link href="http://example.com/posts/2016-01-12-opening-up-your-research-day-2.html" />
-    <id>http://example.com/posts/2016-01-12-opening-up-your-research-day-2.html</id>
+    <link href="https://cbmm.github.io/posts/2016-01-12-opening-up-your-research-day-2.html" />
+    <id>https://cbmm.github.io/posts/2016-01-12-opening-up-your-research-day-2.html</id>
     <published>2016-01-12T00:00:00Z</published>
     <updated>2016-01-12T00:00:00Z</updated>
     <summary type="html"><![CDATA[<div class="info">
@@ -824,8 +896,8 @@ okCmds <span class="op">=</span> <span class="bu">frozenset</span>([<span class=
 </entry>
 <entry>
     <title>Opening your research up to the web - Day 1</title>
-    <link href="http://example.com/posts/2016-01-11-opening-up-your-research-day-1.html" />
-    <id>http://example.com/posts/2016-01-11-opening-up-your-research-day-1.html</id>
+    <link href="https://cbmm.github.io/posts/2016-01-11-opening-up-your-research-day-1.html" />
+    <id>https://cbmm.github.io/posts/2016-01-11-opening-up-your-research-day-1.html</id>
     <published>2016-01-11T00:00:00Z</published>
     <updated>2016-01-11T00:00:00Z</updated>
     <summary type="html"><![CDATA[<div class="info">
@@ -972,8 +1044,8 @@ git push origin gh-pages</code></pre>
 </entry>
 <entry>
     <title>Opening up your research class - Day 0</title>
-    <link href="http://example.com/posts/2016-01-11-opening-up-your-research-day-0.html" />
-    <id>http://example.com/posts/2016-01-11-opening-up-your-research-day-0.html</id>
+    <link href="https://cbmm.github.io/posts/2016-01-11-opening-up-your-research-day-0.html" />
+    <id>https://cbmm.github.io/posts/2016-01-11-opening-up-your-research-day-0.html</id>
     <published>2016-01-11T00:00:00Z</published>
     <updated>2016-01-11T00:00:00Z</updated>
     <summary type="html"><![CDATA[<div class="info">
@@ -1009,8 +1081,8 @@ git push origin gh-pages</code></pre>
 </entry>
 <entry>
     <title>Teaching Git & Github</title>
-    <link href="http://example.com/posts/2016-01-08-iap-git-class.html" />
-    <id>http://example.com/posts/2016-01-08-iap-git-class.html</id>
+    <link href="https://cbmm.github.io/posts/2016-01-08-iap-git-class.html" />
+    <id>https://cbmm.github.io/posts/2016-01-08-iap-git-class.html</id>
     <published>2016-01-08T00:00:00Z</published>
     <updated>2016-01-08T00:00:00Z</updated>
     <summary type="html"><![CDATA[<div class="info">
@@ -1039,8 +1111,8 @@ git push origin gh-pages</code></pre>
 </entry>
 <entry>
     <title>Hakyll setup</title>
-    <link href="http://example.com/posts/2016-01-07-hakyll-setup.html" />
-    <id>http://example.com/posts/2016-01-07-hakyll-setup.html</id>
+    <link href="https://cbmm.github.io/posts/2016-01-07-hakyll-setup.html" />
+    <id>https://cbmm.github.io/posts/2016-01-07-hakyll-setup.html</id>
     <published>2016-01-07T00:00:00Z</published>
     <updated>2016-01-07T00:00:00Z</updated>
     <summary type="html"><![CDATA[<div class="info">
