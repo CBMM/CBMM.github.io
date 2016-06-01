@@ -1,5 +1,5 @@
 ---
-title: People
+title: CBMM People on Github
 ---
 
   - [Brenden Lake](https://github.com/brendenlake)
