@@ -14,6 +14,10 @@ title: CBMM People on Github
 
       ![](https://avatars0.githubusercontent.com/u/597829?v=3&s=400)
 
+  - [Eliza Kosoy](https://github.com/mathpun)
+
+      ![](https://avatars0.githubusercontent.com/u/16209998?v=3&s=460)
+
   - [Greg Hale](https://github.com/imalsogreg)
 
       ![](https://avatars0.githubusercontent.com/u/993484?v=3&s=460)
@@ -32,6 +36,7 @@ margin-bottom: 30px;
   padding: 0px;
   justify-content: space-around;
   align-items: center;
+  flex-wrap: wrap;
 }
 
 .content ul li {
@@ -40,6 +45,7 @@ margin-bottom: 30px;
   flex-direction: column-reverse;
   justify-content: space-around;
   align-items: center;
+  margin: 20px;
 }
 
 .content li > .figure img {
