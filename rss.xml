@@ -7,8 +7,39 @@
         <description><![CDATA[The open-source going ons of CBMM]]></description>
         <atom:link href="https://cbmm.github.io/rss.xml" rel="self"
                    type="application/rss+xml" />
-        <lastBuildDate>Wed, 16 Mar 2016 00:00:00 UT</lastBuildDate>
+        <lastBuildDate>Thu, 21 Jul 2016 00:00:00 UT</lastBuildDate>
         <item>
+    <title>Undergrads, join the CBMM Engineering Corps!</title>
+    <link>https://cbmm.github.io/posts/2016-07-21-CBMM-Corps.html</link>
+    <description><![CDATA[<div class="info">
+    Posted on July 21, 2016
+    
+        by Greg Hale
+    
+</div>
+<div class="info">
+    
+    Tags: 
+    
+</div>
+
+<p>Interested in Deep Learning? <a href="https://deepmind.com/alpha-go">AlphaGo</a>? <a href="https://www.tensorflow.org/">TensorFlow</a>? Adversarial networks, and <a href="https://research.googleblog.com/2015/06/inceptionism-going-deeper-into-neural.html">‘inceptionism’</a>?</p>
+<p>What about software engineering? Curious about web development, <a href="http://haskell.org">functional programming</a>, or the way teams of engineers <a href="https://travis-ci.com">automate testing</a> and deployment?</p>
+<p>The <a href="https://cbmm.mit.edu">Center for Brains Minds and Machines</a> is starting a new experiment. We’re bringing together small teams of students interested in research, engineering and design; to develop projects in a style more like a small company than the typical research lab. We won’t have customers and investors, but we will have synergies between people interested in design, research, and engineering. We will have individual ownership over components, engineering discipline, and practical short-term goals.</p>
+<p>Because CBMM is <a href="https://nsf.gov">NSF</a> funded, all of our work will be open source, and we will develop portfolios we can be proud of for the next steps in our careers.</p>
+<p>To learn more about our research, look at the <a href="https://cbmm.mit.edu">CBMM website</a>. For more about the CBMM Corps projects, look through what we have here on <a href="https://cbmm.github.io">CBMM @ GitHub</a>.</p>
+<p>If this sounds like something you want to be involved in then please send your resume or github handle to <script type="text/javascript">
+<!--
+h='&#x6d;&#x69;&#116;&#46;&#x65;&#100;&#x75;';a='&#64;';n='&#x67;&#114;&#x65;&#x67;&#104;&#x61;&#108;&#x65;';e=n+a+h;
+document.write('<a h'+'ref'+'="ma'+'ilto'+':'+e+'" clas'+'s="em' + 'ail">'+e+'<\/'+'a'+'>');
+// -->
+</script><noscript>&#x67;&#114;&#x65;&#x67;&#104;&#x61;&#108;&#x65;&#32;&#x61;&#116;&#32;&#x6d;&#x69;&#116;&#32;&#100;&#x6f;&#116;&#32;&#x65;&#100;&#x75;</noscript> with a brief (one or two paragraphs) description of your learning goals.</p>
+]]></description>
+    <pubDate>Thu, 21 Jul 2016 00:00:00 UT</pubDate>
+    <guid>https://cbmm.github.io/posts/2016-07-21-CBMM-Corps.html</guid>
+    <dc:creator>Greg Hale</dc:creator>
+</item>
+<item>
     <title>Processing video for web experiments</title>
     <link>https://cbmm.github.io/posts/2016-03-16-video-preprocessing.html</link>
     <description><![CDATA[<div class="info">
