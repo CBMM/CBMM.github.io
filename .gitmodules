@@ -2,3 +2,6 @@
 	path = _site
 	url = git@github.com:CBMM/CBMM.github.io.git
         ignore = all
+[submodule "deps/reflex-platform"]
+	path = deps/reflex-platform
+	url = https://github.com/reflex-frp/reflex-platform
