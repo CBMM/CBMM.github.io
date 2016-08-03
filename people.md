@@ -10,29 +10,10 @@ title: CBMM People on Github
 *New!* CBMM is searching for undergrads to join our research engineering project! [[Post](/posts/2016-07-21-CBMM-Corps.html)]
 </div>
 
-<div class="team team-design">
-## Design Team
 
-Creating art, user interfaces, and interactives to support CBMM experiments and teaching
-
-  - [No Body](https://github.com/brendenlake)
-
-      ![](https://avatars1.githubusercontent.com/u/6304523?v=3&s=460)
-
-  - [Lauren Ipsum](https://github.com/brendenlake)
-
-      ![](https://avatars1.githubusercontent.com/u/6304523?v=3&s=460)
-
-  - [Some Body](https://github.com/brendenlake)
-
-      ![](https://avatars1.githubusercontent.com/u/6304523?v=3&s=460)
-
-
-
-</div>
 
 <div class="team team-research">
-## Research Team
+## Team Neural-Nets
 
 
 Advancing original research and publication in an open source setting
@@ -53,7 +34,7 @@ Advancing original research and publication in an open source setting
 </div>
 
 <div class="team team-web">
-## Web Engineering Team
+## Team Web Development
 
 Building backend services and reactive frontends for computation, measurement and demonstration
 
@@ -67,6 +48,27 @@ Building backend services and reactive frontends for computation, measurement an
       ![](https://avatars0.githubusercontent.com/u/993484?v=3&s=460)
 
 </div>
+
+
+<div class="team team-design">
+## Team Education
+
+Creating art, user interfaces, and interactives to support CBMM experiments and teaching
+
+  - [No Body](https://github.com/brendenlake)
+
+      ![](https://avatars1.githubusercontent.com/u/6304523?v=3&s=460)
+
+  - [Lauren Ipsum](https://github.com/brendenlake)
+
+      ![](https://avatars1.githubusercontent.com/u/6304523?v=3&s=460)
+
+  - [Some Body](https://github.com/brendenlake)
+
+      ![](https://avatars1.githubusercontent.com/u/6304523?v=3&s=460)
+
+</div>
+
 
 </div>
 
