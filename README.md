@@ -7,6 +7,7 @@ A lightweight site & blog for CBMM's github presence.
 Work on the `hakyll` branch. The [Hakyll](http://jaspervdj.be/hakyll) static site generator will build the site from the `.html`, `.markdown`, and `.org` files in the `posts` directory and in the root of the repository. If you have a working Haskell setup, you can see the results of your changes on a version of the site that runs on your computer (at http://localhost:8000)
 
 ```bash
+git submdule update --init --recursive
 git clone -b hakyll git@github.com:CBMM/CBMM.github.io
 cabal sandbox init
 cabal sandbox install --only-dep
