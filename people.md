@@ -17,37 +17,24 @@ title: CBMM People on Github
 
 We research, develop and maintain Deep Learning algorithms. Our goal is to make  a bridge between research ideas and dependable software libraries hosted on multiple neural net frameworks.
 
-  - [Place Holder](https://github.com/brendenlake)
+  - [Qianli Liao](https://github.com/qianli)
 
-      ![](https://avatars1.githubusercontent.com/u/6304523?v=3&s=460)
-
-  - [Place Holder](https://github.com/brendenlake)
-
-      ![](https://avatars1.githubusercontent.com/u/6304523?v=3&s=460)
-
-  - [Place Holder](https://github.com/brendenlake)
-
-      ![](https://avatars1.githubusercontent.com/u/6304523?v=3&s=460)
-
+      ![](https://avatars1.githubusercontent.com/u/1786672?v=3&s=460)
 
 </div>
 
-<div class="plaque team-design">
+<div class="plaque team-psychophysics">
 ### Team Psychophysics
 
 We focus on implementing the human tests that go into brain-inspired learning algorithms. This includes experimental designs based on in-lab platform like [PsychToolbox](TODO), and increasingly on web-base platforms like Amazon [Mechanical Turk](https://mturk.com). Much of our research involves [social intelligence](TODO) and we therefor develop small multi-player games where remote subjects can interact with one another.
 
-  - [NoBody](https://github.com/brendenlake)
+  - [Leyla Isik](https://github.com/lisik)
 
-      ![](https://avatars1.githubusercontent.com/u/6304523?v=3&s=460)
+      ![](https://avatars0.githubusercontent.com/u/7754770?v=3&s=460)
 
-  - [Lauren Ipsum](https://github.com/brendenlake)
+  - [Greg Hale](https://github.com/imalsogreg)
 
-      ![](https://avatars1.githubusercontent.com/u/6304523?v=3&s=460)
-
-  - [Some Body](https://github.com/brendenlake)
-
-      ![](https://avatars1.githubusercontent.com/u/6304523?v=3&s=460)
+      ![](https://avatars0.githubusercontent.com/u/993484?v=3&s=460)
 
 </div>
 
