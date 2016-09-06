@@ -1,22 +1,18 @@
 ---
-title: Projects
+title: Tools
 ---
 
-## Classifier Zoo
-A collection of refereence implementations of well known and cutting-edge classifiers for images, sounds, and video.
+## [CBaaS](https://github.com/CBMM/CBaaS)
+CBMM as a Service. A framework for connecting machine-learning algorithms and users.
 
-## Explorable Explanations
-Interactive web demonstrations that showcase the algorithms in the Classifier Zoo.
+Collaborators: [Ethan Meyers](http://emeyers.scripts.mit.edu/emeyers/)
+
 
 ## Tagging
 Unified psychophysics framework for minds and machines
 
 Collaborators: [Leyla Isik](http://web.mit.edu/~lisik/www/), [Gabriel Krieman](http://klab.tch.harvard.edu/#sthash.XUWvZxYd.dpbs)
 
-## [CBaaS](https://github.com/CBMM/CBaaS)
-CBMM as a Service. A framework for connecting machine-learning algorithms and users.
-
-Collaborators: [Ethan Meyers](http://emeyers.scripts.mit.edu/emeyers/)
 
 ## [Cochleagram](https://github.com/CBMM/cochleagram):
 

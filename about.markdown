@@ -2,8 +2,11 @@
 title: CBMM @ GitHub
 ---
 
-The [Center for Brains, Minds and Machines](http://cbmm.mit.edu) is a multi-disciplinary research center developing brain-inspired intelligent machines. The site you are on now is our space on GitHub, which we use to showcase some of the open source projects we're working on and to try to keep an informal tech blog.
+The CBMM Engineering of Intelligence teams.
+In recent years companies such as [Facebook](https://research.facebook.com) and [Deep Mind](https://deepmind.com) have developed a research model in artificial intelligence based on large engineering teams supporting the research scientists (with 1 engineer per 2 researchers).
+For academia is practically impossible to imitate this model of research.
+We are therefore developing a competing model adapted to the environment of our academic institutions, leveraging the enthusiasm and expertise of Masters students and undergraduate students participating in the UROP program at MIT (and similar ones in other Institutions) and creating teams to support aspects of our research.
+At the same time the program aims to offer an exciting educational experience to young students who are passionate about engineering.
+We are starting with three [teams](/people.html) on Web Interfaces, Deep Learning and Psychophysics.
 
-A core mission of CBMM is to bring together scientists from all walks of neuroscience and cognitive science. We want to develop more than just traditional collaborations. When a computational psychologist in CBMM builds a model of visual search, we want her model results to live in the same database with real data from experimental psychology. And we want other scientists or any curious people to be able to run that model over the internet, and to be able to do their own informal data collection on themselves for comparison!
-
-If you like these ideas, watch this space! Check out our [Projects](/projects.html) page, and consider joining in on the work, at [https://github.com/cbmm](https://github.com/cbmm).
+If you like these ideas, watch this space! Check out our [People](/people.html) page, and consider joining in on the work, at [https://github.com/cbmm](https://github.com/cbmm).
