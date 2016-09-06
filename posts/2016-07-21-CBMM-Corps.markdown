@@ -1,5 +1,5 @@
 ---
-title: Undergrads, join the CBMM Engineering Corps!
+title: Masters Students & Undergrads, join the CBMM Engineering Intelligence Team!
 author: Greg Hale
 ---
 
