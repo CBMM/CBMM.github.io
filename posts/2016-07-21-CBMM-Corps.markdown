@@ -14,6 +14,6 @@ We will have individual ownership over components, engineering discipline, and p
 
 Because CBMM is [NSF](https://nsf.gov) funded, all of our work will be open source, and we will develop portfolios we can be proud of for the next steps in our careers.
 
-To learn more about our research, look at the [CBMM website](https://cbmm.mit.edu). For more about the CBMM Corps projects, look through what we have here on [CBMM @ GitHub](https://cbmm.github.io).
+To learn more about our research, look at the [CBMM website](https://cbmm.mit.edu). For more about the CBMM Corps projects, look through what we have here on [CBMM @ GitHub](/). See what [Specialist Teams](/people) and [Projects](/projects) we have in mind.
 
 If this sounds like something you want to be involved in then please send your resume or github handle to [greghale@mit.edu](mailto:greghale@mit.edu) with a brief (one or two paragraphs) description of your learning goals.
