@@ -33,7 +33,7 @@
 h='&#x6d;&#x69;&#116;&#46;&#x65;&#100;&#x75;';a='&#64;';n='&#x67;&#114;&#x65;&#x67;&#104;&#x61;&#108;&#x65;';e=n+a+h;
 document.write('<a h'+'ref'+'="ma'+'ilto'+':'+e+'" clas'+'s="em' + 'ail">'+e+'<\/'+'a'+'>');
 // -->
-</script><noscript>&#x67;&#114;&#x65;&#x67;&#104;&#x61;&#108;&#x65;&#32;&#x61;&#116;&#32;&#x6d;&#x69;&#116;&#32;&#100;&#x6f;&#116;&#32;&#x65;&#100;&#x75;</noscript> with a brief (one or two paragraphs) description of your learning goals.</p>
+</script><noscript>&#x67;&#114;&#x65;&#x67;&#104;&#x61;&#108;&#x65;&#32;&#x61;&#116;&#32;&#x6d;&#x69;&#116;&#32;&#100;&#x6f;&#116;&#32;&#x65;&#100;&#x75;</noscript> with a brief (one or two paragraphs) description of your learning goals. If you have access to the MIT UROP office, please apply to our <a href="http://web.mit.edu/urop/research/openings.html">UROP ad</a>.</p>
 ]]></description>
     <pubDate>Thu, 21 Jul 2016 00:00:00 UT</pubDate>
     <guid>https://cbmm.github.io/posts/2016-07-21-CBMM-Corps.html</guid>
