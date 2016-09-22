@@ -17,6 +17,10 @@ title: CBMM People on Github
 
 We research, develop and maintain Deep Learning algorithms. Our goal is to make  a bridge between research ideas and dependable software libraries hosted on multiple neural net frameworks.
 
+  - [Georgios Evangelopoulos](https://github.com/gevangel)
+
+      ![](https://avatars2.githubusercontent.com/u/1653394?v=3&s=466)
+
   - [Qianli Liao](https://github.com/qianli)
 
       ![](https://avatars1.githubusercontent.com/u/1786672?v=3&s=460)
@@ -80,6 +84,10 @@ We develop web applications supporting the collection of data, running of resear
   - [Greg Hale](https://github.com/imalsogreg)
 
       ![](https://avatars0.githubusercontent.com/u/993484?v=3&s=460)
+
+  - [Georgios Evangelopoulos](https://github.com/gevangel)
+
+      ![](https://avatars2.githubusercontent.com/u/1653394?v=3&s=466)
 
 
 </div>
