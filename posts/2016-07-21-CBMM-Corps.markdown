@@ -16,4 +16,4 @@ Because CBMM is [NSF](https://nsf.gov) funded, all of our work will be open sour
 
 To learn more about our research, look at the [CBMM website](https://cbmm.mit.edu). For more about the CBMM Corps projects, look through what we have here on [CBMM @ GitHub](/). See what [Specialist Teams](/people) and [Projects](/projects) we have in mind.
 
-If this sounds like something you want to be involved in then please send your resume or github handle to [greghale@mit.edu](mailto:greghale@mit.edu) with a brief (one or two paragraphs) description of your learning goals.
+If this sounds like something you want to be involved in then please send your resume or github handle to [greghale@mit.edu](mailto:greghale@mit.edu) with a brief (one or two paragraphs) description of your learning goals. If you have access to the MIT UROP office, please apply to our [UROP ad](http://web.mit.edu/urop/research/openings.html).
