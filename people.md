@@ -50,6 +50,19 @@ We develop web applications supporting the collection of data, running of resear
 
 </div>
 
+<div class="plaque team-bio">
+### Team Biophysics
+
+We want to know which mechanisms the human brain uses to understand the world. We build biophysical models that can predict neuroimaging and can describe the structure and function of brain areas in the visual hierarchy. By understanding the mechanisms in healthy people we also hope to understand what goes wrong in patients.
+
+  - [Dimitris Pinotsis](https://github.com/dimitrisap)
+
+      ![](https://avatars2.githubusercontent.com/u/18057534?v=3&s=466)
+
+</div>
+
+
+
 </div>
 
 
