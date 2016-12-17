@@ -42,9 +42,6 @@
                 <a href="../about.html" class="pure-menu-link"><span>About</span></a>
             </li>
             <li class="pure-menu-item">
-                <a href="../posts/2016-07-21-CBMM-Corps.html" class="pure-menu-link"><span>Join</span></a>
-            </li>
-            <li class="pure-menu-item">
                 <a href="../tools.html" class="pure-menu-link"><span>Tools</span></a>
             </li>
             <li class="pure-menu-item">
@@ -179,22 +176,22 @@ sudo apt-get install cowsay</code></pre>
 <span class="kw">import </span><span class="dt">Snap.Util.FileServe</span>    (serveFile)
 <span class="kw">import </span><span class="dt">System.Process</span>         (readProcess)
 
-<span class="fu">------------------------------------------------------------------------------</span>
+<span class="co">------------------------------------------------------------------------------</span>
 <span class="co">-- | List of shell commands we'll make available to the server</span>
 cmds <span class="fu">=</span> [<span class="st">&quot;doubleit&quot;</span>, <span class="st">&quot;cowsay&quot;</span>]
 
-<span class="fu">------------------------------------------------------------------------------</span>
+<span class="co">------------------------------------------------------------------------------</span>
 <span class="co">-- | A list of pairs: (Query striing to pattern-match from the URL, Handler)</span>
 routes <span class="fu">=</span> [ (<span class="st">&quot;/:cmd/:arg&quot;</span>, serveCommand cmds             ),
            (<span class="st">&quot;&quot;</span>,           ifTop (serveFile <span class="st">&quot;index.html&quot;</span>))
          ]
 
-<span class="fu">------------------------------------------------------------------------------</span>
+<span class="co">------------------------------------------------------------------------------</span>
 <span class="co">-- | Main function chooses between serving static assets</span>
 <span class="co">--   and handling command requests</span>
 main <span class="fu">=</span> quickHttpServe (route routes)
 
-<span class="fu">------------------------------------------------------------------------------</span>
+<span class="co">------------------------------------------------------------------------------</span>
 <span class="co">-- | Handler to extract the command name and argument string</span>
 <span class="co">--   from the request, run it, and respond with the command's output</span>
 serveCommand okCmds <span class="fu">=</span> <span class="kw">do</span>
@@ -243,7 +240,7 @@ okCmds <span class="op">=</span> <span class="bu">frozenset</span>([<span class=
 
 <span class="at">@app.route</span>(<span class="st">'/&lt;cmd&gt;/&lt;arg&gt;'</span>)
 <span class="kw">def</span> runCmd(cmd,arg):
-    <span class="cf">if</span> cmd <span class="op">in</span> okCmds:
+    <span class="cf">if</span> cmd <span class="kw">in</span> okCmds:
         o <span class="op">=</span> subprocess.check_output([cmd,arg])
         <span class="cf">return</span> (<span class="st">'&lt;pre&gt;'</span> <span class="op">+</span> o <span class="op">+</span> <span class="st">'&lt;/pre&gt;'</span>)
     <span class="cf">else</span>:

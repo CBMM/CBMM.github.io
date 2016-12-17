@@ -101,7 +101,7 @@ ffmpeg -i path/to/video.m4v -strict -2 -b:v 2M video.ogg
 <h2 id="unfolding">Unfolding</h2>
 <p>The next thing we often do is extract lots of clips from the video<a href="#fn2" class="footnoteRef" id="fnref2"><sup>2</sup></a>. For all the things <code>ffmpeg</code> can do, unfolding a long video into a long list of short videos efficiently is not one of them. I wrote a command line utility called <a href="https://github.com/CBMM/videoutils/releases">CutAtFrames</a>(<a href="https://github.com/CBMM/videoutils">repo</a>) for this. <code>CutAtFrames</code> takes a path to an input video, a path to a file with a list of cut frames, the framerate, and an output directry. It first breaks the input file into ~2 minute chunks<a href="#fn3" class="footnoteRef" id="fnref3"><sup>3</sup></a>, and then divides those chunks into clips at the boundaries that you specify in the cut frames file. Seeking and copying from the video file is not very fast, so <code>CutAtFrames</code> generally takes a few hours to run for a two hour movie cut into ten second clips.</p>
 <p>The contents of the cut file is a single integer marking the last frame of the clip (the first frame is inferred to be the one after the last frame of the last clip - the next version may take frame ranges here instead). A sample run looks like this:</p>
-<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="kw">./CutAtFrames</span> -i Videos/pointlights.mp4 -c Videos/pcuts.txt -f 29.97 -b 120 -o ./mp4/</code></pre></div>
+<div class="sourceCode"><pre class="sourceCode bash"><code class="sourceCode bash"><span class="ex">./CutAtFrames</span> -i Videos/pointlights.mp4 -c Videos/pcuts.txt -f 29.97 -b 120 -o ./mp4/</code></pre></div>
 <div class="footnotes">
 <hr />
 <ol>
@@ -838,22 +838,22 @@ sudo apt-get install cowsay</code></pre>
 <span class="kw">import </span><span class="dt">Snap.Util.FileServe</span>    (serveFile)
 <span class="kw">import </span><span class="dt">System.Process</span>         (readProcess)
 
-<span class="fu">------------------------------------------------------------------------------</span>
+<span class="co">------------------------------------------------------------------------------</span>
 <span class="co">-- | List of shell commands we&#39;ll make available to the server</span>
 cmds <span class="fu">=</span> [<span class="st">&quot;doubleit&quot;</span>, <span class="st">&quot;cowsay&quot;</span>]
 
-<span class="fu">------------------------------------------------------------------------------</span>
+<span class="co">------------------------------------------------------------------------------</span>
 <span class="co">-- | A list of pairs: (Query striing to pattern-match from the URL, Handler)</span>
 routes <span class="fu">=</span> [ (<span class="st">&quot;/:cmd/:arg&quot;</span>, serveCommand cmds             ),
            (<span class="st">&quot;&quot;</span>,           ifTop (serveFile <span class="st">&quot;index.html&quot;</span>))
          ]
 
-<span class="fu">------------------------------------------------------------------------------</span>
+<span class="co">------------------------------------------------------------------------------</span>
 <span class="co">-- | Main function chooses between serving static assets</span>
 <span class="co">--   and handling command requests</span>
 main <span class="fu">=</span> quickHttpServe (route routes)
 
-<span class="fu">------------------------------------------------------------------------------</span>
+<span class="co">------------------------------------------------------------------------------</span>
 <span class="co">-- | Handler to extract the command name and argument string</span>
 <span class="co">--   from the request, run it, and respond with the command&#39;s output</span>
 serveCommand okCmds <span class="fu">=</span> <span class="kw">do</span>
@@ -902,7 +902,7 @@ okCmds <span class="op">=</span> <span class="bu">frozenset</span>([<span class=
 
 <span class="at">@app.route</span>(<span class="st">&#39;/&lt;cmd&gt;/&lt;arg&gt;&#39;</span>)
 <span class="kw">def</span> runCmd(cmd,arg):
-    <span class="cf">if</span> cmd <span class="op">in</span> okCmds:
+    <span class="cf">if</span> cmd <span class="kw">in</span> okCmds:
         o <span class="op">=</span> subprocess.check_output([cmd,arg])
         <span class="cf">return</span> (<span class="st">&#39;&lt;pre&gt;&#39;</span> <span class="op">+</span> o <span class="op">+</span> <span class="st">&#39;&lt;/pre&gt;&#39;</span>)
     <span class="cf">else</span>:
