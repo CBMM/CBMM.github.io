@@ -78,7 +78,7 @@ We want to know which mechanisms the human brain uses to understand the world. W
 
       ![](https://avatars1.githubusercontent.com/u/6304523?v=3&s=460)
 
-  - [Tejas Kalkarni](https://github.com/mrkulk)
+  - [Tejas Kulkarni](https://github.com/mrkulk)
 
       ![](https://avatars3.githubusercontent.com/u/1375144?v=3&s=460)
 
